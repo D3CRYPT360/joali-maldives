@@ -3,6 +3,24 @@
 const API_BASE = "http://144.91.126.109:5000";
 const API_KEY = "sk-8fj29dk3nf03jfldkf0293jf02ldkf03";
 
+type Organization = {
+  id: number;
+  name: string;
+  registrationNumber: string;
+  email: string;
+  phone: string;
+  address: string;
+  country: string;
+  website?: string;
+  logoUrl?: string;
+  isActive: boolean;
+  createdAt?: string;
+  updatedAt?: string | null;
+  parentOrganizationId?: number | null;
+  parentOrganization?: any | null;
+  type: number;
+};
+
 class JoaliApi {
   
 
@@ -111,6 +129,39 @@ class JoaliApi {
     if (!res.ok) {
       throw new Error(data.message || 'Failed to toggle user');
     }
+    return data;
+  }
+
+  async getAllOrganizations(): Promise<Organization[]> {
+    const res = await fetch(`${this.baseUrl}/api/Organization`, {
+      method: "GET",
+      headers: this.headers
+    });
+    let data: Organization[] = [];
+    const text = await res.text();
+    try {
+      data = text ? JSON.parse(text) : [];
+    } catch (e) {
+      data = [];
+    }
+    if (!Array.isArray(data)) data = [];
+    return data;
+  }
+
+  async createOrganization(org: Omit<Organization, 'id' | 'createdAt' | 'updatedAt' | 'parentOrganizationId' | 'parentOrganization' | 'isActive'>) {
+    const res = await fetch(`${this.baseUrl}/api/Organization/Create`, {
+      method: "POST",
+      headers: this.headers,
+      body: JSON.stringify(org),
+    });
+    let data = null;
+    const text = await res.text();
+    try {
+      data = text ? JSON.parse(text) : null;
+    } catch (e) {
+      data = null;
+    }
+    if (!res.ok) throw new Error((data && data.message) || 'Failed to create organization');
     return data;
   }
 }

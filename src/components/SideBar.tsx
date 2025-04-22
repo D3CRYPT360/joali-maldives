@@ -105,6 +105,13 @@ return (
                                     Hotel Owners
                                 </span>
                     </li>
+                    <Link href="/organizations">
+                    <li className={`text-gray-700 text-base flex items-center gap-x-4 cursor-pointer p-2 hover:bg-gray-200 rounded-md `}> <FaHotel className='text-2xl block float-left mt-3' /> 
+                                <span className={`text-base font-medium mt-3  flex-1 duration-200 ${!open && "hidden"}`}>
+                                    Organizations
+                                </span>
+                    </li>
+                    </Link>
                 </ul>
             </section>
             {/* Sidebar section end*/}
