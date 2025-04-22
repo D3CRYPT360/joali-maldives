@@ -5,30 +5,39 @@ interface ActivityCardProps {
   title: string;
   location?: string;
   price?: string;
+  buttonLabel?: string;
+  onButtonClick?: () => void;
 }
 
-export default function ActivityCard({ image, title, location, price }: ActivityCardProps) {
+export default function ActivityCard({ image, title, location, price, buttonLabel = 'Book Now', onButtonClick }: ActivityCardProps) {
   return (
-    <div className="relative rounded-3xl overflow-hidden">
-      <div className="aspect-[4/3] relative">
+    <div className="bg-white rounded-2xl shadow-xl overflow-hidden hover:scale-105 transition-transform flex flex-col">
+      <div className="relative h-48 w-full">
         <Image
           src={image}
           alt={title}
           fill
           className="object-cover"
+          sizes="(max-width: 768px) 100vw, 33vw"
+          onError={e => (e.currentTarget.src = 'https://source.unsplash.com/featured/?hotel,activity')}
         />
       </div>
-      <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/50 to-transparent">
-        <h4 className="text-white text-xl font-medium">{title}</h4>
-        {location && (
-          <p className="text-white/80 text-sm">{location}</p>
-        )}
-        {price && (
-          <div className="absolute top-4 right-4 bg-white/90 px-4 py-1 rounded-full">
-            <span className="text-sm font-medium">${price}</span>
-          </div>
-        )}
+      <div className="p-6 flex flex-col gap-2 flex-1">
+        <h2 className="text-xl font-semibold text-[#5B2415]">{title}</h2>
+        {location && <p className="text-sm text-[#8B4513]">{location}</p>}
+        <div className="mt-2 flex justify-between items-center">
+          {price && <span className="text-lg font-bold text-[#152C5B]">${price}</span>}
+          <button
+            className="bg-[#8B4513] hover:bg-[#5B2415] text-white px-4 py-2 rounded-lg text-sm transition"
+            onClick={onButtonClick}
+            type="button"
+          >
+            {buttonLabel}
+          </button>
+        </div>
       </div>
     </div>
   );
 }
+
+

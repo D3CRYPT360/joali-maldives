@@ -1,6 +1,9 @@
+"use client"
 import React from "react";
+import { useRouter } from "next/navigation";
 
 export default function TicketsPage() {
+  const router = useRouter();
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#f8f3f1] to-[#f7f5f3] flex flex-col items-center">
       {/* Navbar Placeholder (assume it's in layout) */}
@@ -17,7 +20,12 @@ export default function TicketsPage() {
             </div>
             <h2 className="text-xl font-semibold mb-2 text-gray-900">Ferry Tickets</h2>
             <p className="text-gray-600 mb-6 text-center">Travel between islands with comfort and style.</p>
-            <button className="bg-orange-300 hover:bg-orange-400 text-white font-semibold py-2 px-6 rounded-lg transition-colors shadow-md">Book Ferry</button>
+            <button
+  className="bg-orange-300 hover:bg-orange-400 text-white font-semibold py-2 px-6 rounded-lg transition-colors shadow-md"
+  onClick={() => router.push("/tickets/ferry-booking")}
+>
+  Book Ferry
+</button>
           </div>
 
           {/* Themepark Events Card */}

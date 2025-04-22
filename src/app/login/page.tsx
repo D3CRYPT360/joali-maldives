@@ -3,6 +3,7 @@ import Link from 'next/link';
 import React, { useState } from 'react'
 import { api } from '../api';
 import { useRouter } from 'next/navigation';
+import { jwtDecode } from "jwt-decode";
 
 export default function login_page() {
   const [email, setEmail] = useState("");
@@ -11,22 +12,43 @@ export default function login_page() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const router = useRouter();
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError("");
     setSuccess("");
+    if (!emailRegex.test(email)) {
+      setError("Please enter a valid email address.");
+      setLoading(false);
+      return;
+    }
     try {
-      const { message } = await api.login({ email, password });
-      setSuccess(message || "Login successful!");
-      setTimeout(() => window.location.replace('/'), 1000); // Redirect after 1 second with full reload
+      const data = await api.login({ email, password });
+      setSuccess(data.message || "Login successful!");
+      // Get access token from localStorage
+    const accessToken = api.getAccessToken();
+      let userId = "";
+      if (accessToken) {
+        const decoded = jwtDecode(accessToken) as { [key: string]: any };
+        const name = decoded["name"] || decoded.name || "User";
+        userId = decoded["userId"] || "";
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('user_name', name);
+          localStorage.setItem('user_id', userId);
+        }
+      }
+      if (userId) {
+        window.location.href = `/home/${userId}`;
+      } else {
+        window.location.href = '/';
+      }
     } catch (err: any) {
       setError(err.message || "Login failed");
     } finally {
       setLoading(false);
     }
   }
-
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
       {/* Left Panel: Brand */}

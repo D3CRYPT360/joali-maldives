@@ -64,55 +64,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Booking Form */}
-      <section className="px-4 -mt-8">
-        <div className="container mx-auto">
-          <div className="bg-[#ECAF9E] rounded-3xl p-8 shadow-lg">
-            <div className="grid md:grid-cols-4 gap-6">
-              <div className="bg-white rounded-xl p-4 flex items-center gap-4 text-[#152C5B]">
-                <FaCalendarAlt className="text-xl text-gray-600" />
-                <input
-                  type="date"
-                  value={checkInDate}
-                  onChange={(e) => setCheckInDate(e.target.value)}
-                  className="w-full outline-none"
-                  placeholder="Check in"
-                />
-              </div>
-              <div className="bg-white rounded-xl p-4 flex items-center gap-4">
-                <FaCalendarAlt className="text-xl text-gray-600" />
-                <select
-                  value={duration}
-                  onChange={(e) => setDuration(e.target.value)}
-                  className="w-full outline-none text-[#152C5B]"
-                >
-                  <option value="">Select Duration</option>
-                  <option value="3">3 Days</option>
-                  <option value="5">5 Days</option>
-                  <option value="7">7 Days</option>
-                </select>
-              </div>
-              <div className="bg-white rounded-xl p-4 flex items-center gap-4">
-                <FaUser className="text-xl text-gray-600" />
-                <select
-                  value={persons}
-                  onChange={(e) => setPersons(Number(e.target.value))}
-                  className="w-full outline-none text-[#152C5B]"
-                >
-                  <option value="1">1 Person</option>
-                  <option value="2">2 Persons</option>
-                  <option value="3">3 Persons</option>
-                  <option value="4">4 Persons</option>
-                </select>
-              </div>
-              <button className="bg-[#5B2415] text-white rounded-xl p-4 flex items-center justify-center gap-2">
-                <FaSearch />
-                <span>Search</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
+      
 
       {/* Theme Park Activities */}
       <section className="py-20 px-4">

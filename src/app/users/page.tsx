@@ -7,10 +7,22 @@ import { useEffect } from 'react';
 import { useState } from 'react';
 import { api } from '../api';
 
+type User = {
+  id: number;
+  name: string;
+  email: string;
+  phoneNumber?: string;
+  phone?: string;
+  createdAt?: string;
+  isActive: boolean;
+};
+
 export default function page() {
-  const [users, setUsers] = useState([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive">("all");
 
   useEffect(() => {
     async function fetchUsers() {
@@ -36,6 +48,25 @@ export default function page() {
         <div className="flex-1 p-8">
           <h1 className='text-2xl font-bold text-[#8B4513] mb-6'>All Users</h1>
           <div className='bg-white rounded-lg p-6 shadow-sm'>
+            {/* Search and Filter Controls */}
+            <div className="flex flex-col md:flex-row md:items-center gap-4 mb-6">
+              <input
+                type="text"
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                placeholder="Search by name or email..."
+                className="border px-4 py-2 rounded-md w-full md:w-64"
+              />
+              <select
+                value={statusFilter}
+                onChange={e => setStatusFilter(e.target.value as any)}
+                className="border px-4 py-2 rounded-md w-full md:w-48"
+              >
+                <option value="all">All Users</option>
+                <option value="active">Active Only</option>
+                <option value="inactive">Inactive Only</option>
+              </select>
+            </div>
             {loading ? (
               <div className="text-center text-gray-500">Loading users...</div>
             ) : error ? (
@@ -55,8 +86,19 @@ export default function page() {
                     </tr>
                   </thead>
                   <tbody>
-                    {users.map((user: any, index: number) => (
-                      <tr key={user.id || index} className='border-b'>
+                    {users
+                      .filter(user => {
+                        const matchesSearch =
+                          user.name.toLowerCase().includes(search.toLowerCase()) ||
+                          user.email.toLowerCase().includes(search.toLowerCase());
+                        const matchesStatus =
+                          statusFilter === "all" ||
+                          (statusFilter === "active" && user.isActive) ||
+                          (statusFilter === "inactive" && !user.isActive);
+                        return matchesSearch && matchesStatus;
+                      })
+                      .map((user: User, index: number) => (
+                        <tr key={user.id || index} className='border-b'>
                         <td className='py-4 text-black font-medium'>{user.id}</td>
                         <td className='py-4 text-black font-medium'>{user.name}</td>
                         <td className='py-4 text-black'>{user.email}</td>
@@ -68,19 +110,26 @@ export default function page() {
                           </span>
                         </td>
                         <td className='py-4'>
-                          <div className='flex gap-2'>
-                            <button className='p-2 text-blue-600 hover:bg-blue-50 rounded' title="Edit">
-                              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                              </svg>
-                            </button>
-                            <button className='p-2 text-red-600 hover:bg-red-50 rounded' title="Delete">
-                              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                              </svg>
-                            </button>
-                          </div>
-                        </td>
+  <div className="flex items-center gap-2">
+    <label className="relative inline-flex items-center cursor-pointer">
+      <input
+        type="checkbox"
+        checked={user.isActive}
+        onChange={async () => {
+          try {
+            await api.toggleUser(user.email);
+            setUsers(users => users.map(u => u.id === user.id ? { ...u, isActive: !u.isActive } : u));
+          } catch (err) {
+            alert('Failed to toggle user');
+          }
+        }}
+        className="sr-only peer"
+      />
+      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-400 rounded-full peer peer-checked:bg-green-500 transition-all"></div>
+      <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full shadow-md transition-all peer-checked:translate-x-5"></div>
+    </label>
+  </div>
+</td>
                       </tr>
                     ))}
                   </tbody>

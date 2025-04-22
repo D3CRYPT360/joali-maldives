@@ -4,6 +4,8 @@ const API_BASE = "http://144.91.126.109:5000";
 const API_KEY = "sk-8fj29dk3nf03jfldkf0293jf02ldkf03";
 
 class JoaliApi {
+  
+
   baseUrl: string;
   apiKey: string;
   headers: Record<string, string>;
@@ -15,6 +17,8 @@ class JoaliApi {
     this.tokenKey = '';
     this.headers = { "Content-Type": "application/json", 'Authorization': `Bearer ${this.getAccessToken()}` };
   }
+
+  
 
   setAccessToken(token: string) {
     if (typeof window !== 'undefined') {
@@ -42,6 +46,7 @@ class JoaliApi {
       body: JSON.stringify({ email, password, apiKey: this.apiKey }),
     });
     const data = await res.json();
+    console.log(data);
     if (!res.ok) {
       console.error("Login error:", data);
       throw new Error(data.message || JSON.stringify(data) || "Login failed");
@@ -50,6 +55,7 @@ class JoaliApi {
     if (data.token && data.token.accessToken) {
       this.setAccessToken(data.token.accessToken);
     }
+    
     return data;
   }
 
@@ -93,6 +99,18 @@ class JoaliApi {
       throw new Error(data.message || JSON.stringify(data) || "Logout failed");
     }
     this.clearAccessToken();
+    return data;
+  }
+
+  async toggleUser(email: string) {
+    const res = await fetch(`${this.baseUrl}/api/User/ToggleUser?apiKey=${this.apiKey}&Email=${email}`, {
+      method: "POST",
+      headers: this.headers,
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.message || 'Failed to toggle user');
+    }
     return data;
   }
 }

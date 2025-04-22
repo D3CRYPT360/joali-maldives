@@ -21,7 +21,7 @@ const Navbar = () => {
     try {
       await api.logout();
       setIsLoggedIn(false);
-      window.location.reload();
+      window.location.href = "/";
     } catch (err) {
       alert((err as any).message || 'Logout failed');
       setLoading(false);
@@ -36,11 +36,12 @@ const Navbar = () => {
         </Link>
         <div className="hidden md:flex gap-8 text-[#5B2415]">
           <a href="/" className="hover:text-opacity-80">Home</a>
-          <a href="/rooms" className="hover:text-opacity-80">Rooms</a>
+          <a href="/hotels" className="hover:text-opacity-80">Hotels</a>
           <a href="#" className="hover:text-opacity-80">About</a>
           <a href="#" className="hover:text-opacity-80">Contact</a>
           <Link href="/dashboard" className="hover:text-opacity-80">Dashboard</Link>
           <Link href="/tickets" className="hover:text-opacity-80">Tickets</Link>
+          <Link href="/themepark" className="hover:text-opacity-80">Theme Park</Link>
         </div>
         {isLoggedIn ? (
           <button
