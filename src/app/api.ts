@@ -132,8 +132,8 @@ class JoaliApi {
     return data;
   }
 
-  async getAllOrganizations(): Promise<Organization[]> {
-    const res = await fetch(`${this.baseUrl}/api/Organization`, {
+  async getAllOrganizations(orgType?: number): Promise<Organization[]> {
+    const res = await fetch(`${this.baseUrl}/api/Organization?orgtype=${orgType || ''}`, {
       method: "GET",
       headers: this.headers
     });

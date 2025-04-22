@@ -8,7 +8,7 @@ import { api } from "../api";
 const orgTypes = [
   { value: 0, label: "Other" },
   { value: 1, label: "Hotel" },
-  { value: 2, label: "Restaurante" },
+  { value: 2, label: "Restaurant" },
   { value: 3, label: "Ferry" },
   { value: 4, label: "Park" },
   { value: 5, label: "Events" },
