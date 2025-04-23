@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import React, { useEffect, useState } from "react";
 import SideBar from "@/components/SideBar";
@@ -69,9 +69,14 @@ const Organizations = () => {
     fetchOrgs();
   }, []);
 
-  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleFormChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
-    setForm(prev => ({ ...prev, [name]: name === "type" ? Number(value) : value }));
+    setForm((prev) => ({
+      ...prev,
+      [name]: name === "type" ? Number(value) : value,
+    }));
   };
 
   const handleFormSubmit = async (formData: typeof initialFormState) => {
@@ -79,7 +84,9 @@ const Organizations = () => {
     setFormError("");
     setFormSuccess("");
     try {
-      await api.createOrganization(formData);
+      // Ensure type is always a number
+      const cleanFormData = { ...formData, type: Number(formData.type) };
+      await api.createOrganization(cleanFormData);
       setFormSuccess("Organization created successfully!");
       setForm(initialFormState);
       setShowModal(false);
@@ -92,13 +99,14 @@ const Organizations = () => {
     }
   };
 
-
   return (
     <div className="relative w-full min-h-screen bg-gray-50">
       <div className="flex">
         <SideBar />
         <div className="flex-1 p-8">
-          <h1 className="text-2xl font-bold text-gray-800 mb-6">Organizations</h1>
+          <h1 className="text-2xl font-bold text-gray-800 mb-6">
+            Organizations
+          </h1>
           <div className="bg-white rounded-lg p-6 shadow-sm">
             <div className="flex justify-between items-center mb-6">
               <div className="flex-1 max-w-xl">
@@ -118,15 +126,20 @@ const Organizations = () => {
               </div>
             </div>
             <div className="mt-6">
-              <h2 className="text-lg font-semibold mb-4 text-black">Organization List</h2>
+              <h2 className="text-lg font-semibold mb-4 text-black">
+                Organization List
+              </h2>
               {loading ? (
-                <div className="text-center text-gray-500">Loading organizations...</div>
+                <div className="text-center text-gray-500">
+                  Loading organizations...
+                </div>
               ) : error ? (
                 <div className="text-center text-red-600">{error}</div>
               ) : (
                 <table className="w-full">
                   <thead>
                     <tr className="text-left text-gray-600 border-b">
+                      <th className="pb-3">ID</th>
                       <th className="pb-3">Name</th>
                       <th className="pb-3">Type</th>
                       <th className="pb-3">Email</th>
@@ -139,6 +152,7 @@ const Organizations = () => {
                   <tbody>
                     {orgs.map((org, idx) => (
                       <tr key={org.id || idx} className="border-b">
+                        <td className="py-4 text-black">{org.id || idx}</td>
                         <td className="py-4 text-black font-medium flex items-center gap-2">
                           {org.logoUrl && (
                             <img
@@ -150,7 +164,8 @@ const Organizations = () => {
                           {org.name}
                         </td>
                         <td className="py-4 text-black">
-                          {orgTypes.find(t => t.value === org.type)?.label || "Other"}
+                          {orgTypes.find((t) => t.value === Number(org.type))
+                            ?.label || "Other"}
                         </td>
                         <td className="py-4 text-black">{org.email}</td>
                         <td className="py-4 text-black">{org.phone}</td>
@@ -165,7 +180,9 @@ const Organizations = () => {
                           </span>
                         </td>
                         <td className="py-4 text-black">
-                          {org.createdAt ? new Date(org.createdAt).toLocaleDateString() : "-"}
+                          {org.createdAt
+                            ? new Date(org.createdAt).toLocaleDateString()
+                            : "-"}
                         </td>
                       </tr>
                     ))}
@@ -181,7 +198,7 @@ const Organizations = () => {
             loading={formLoading}
             error={formError}
             success={formSuccess}
-            form={form}
+            form={{ ...form, type: Number(form.type) }}
             onFormChange={handleFormChange}
           />
         </div>

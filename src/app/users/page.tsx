@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import React from 'react'
+import React from "react";
 import SideBar from "@/components/SideBar";
 
-import { useEffect } from 'react';
-import { useState } from 'react';
-import { api } from '../api';
+import { useEffect } from "react";
+import { useState } from "react";
+import { api } from "../api";
 
 type User = {
   id: number;
@@ -15,6 +15,8 @@ type User = {
   phone?: string;
   createdAt?: string;
   isActive: boolean;
+  userType?: number;
+  staffRole?: string;
 };
 
 export default function page() {
@@ -22,7 +24,9 @@ export default function page() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive">("all");
+  const [statusFilter, setStatusFilter] = useState<
+    "all" | "active" | "inactive"
+  >("all");
 
   useEffect(() => {
     async function fetchUsers() {
@@ -32,7 +36,7 @@ export default function page() {
         const data = await api.getAllUsers();
         setUsers(data);
       } catch (err) {
-        setError((err as any).message || 'Failed to fetch users');
+        setError((err as any).message || "Failed to fetch users");
       } finally {
         setLoading(false);
       }
@@ -42,24 +46,24 @@ export default function page() {
 
   return (
     <div className="relative w-full min-h-screen bg-gray-100">
-      <div className='flex'>
+      <div className="flex">
         {/* Sidebar Section  */}
-        <SideBar/>
+        <SideBar />
         <div className="flex-1 p-8">
-          <h1 className='text-2xl font-bold text-[#8B4513] mb-6'>All Users</h1>
-          <div className='bg-white rounded-lg p-6 shadow-sm'>
+          <h1 className="text-2xl font-bold text-[#8B4513] mb-6">All Users</h1>
+          <div className="bg-white rounded-lg p-6 shadow-sm">
             {/* Search and Filter Controls */}
             <div className="flex flex-col md:flex-row md:items-center gap-4 mb-6">
               <input
                 type="text"
                 value={search}
-                onChange={e => setSearch(e.target.value)}
+                onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search by name or email..."
                 className="border px-4 py-2 rounded-md w-full md:w-64"
               />
               <select
                 value={statusFilter}
-                onChange={e => setStatusFilter(e.target.value as any)}
+                onChange={(e) => setStatusFilter(e.target.value as any)}
                 className="border px-4 py-2 rounded-md w-full md:w-48"
               >
                 <option value="all">All Users</option>
@@ -72,25 +76,31 @@ export default function page() {
             ) : error ? (
               <div className="text-center text-red-600">{error}</div>
             ) : (
-              <div className='overflow-x-auto'>
-                <table className='w-full'>
+              <div className="overflow-x-auto">
+                <table className="w-full">
                   <thead>
-                    <tr className='text-left text-gray-600 border-b'>
-                      <th className='pb-3'>ID</th>
-                      <th className='pb-3'>Name</th>
-                      <th className='pb-3'>Email</th>
-                      <th className='pb-3'>Phone</th>
-                      <th className='pb-3'>Created At</th>
-                      <th className='pb-3'>Status</th>
-                      <th className='pb-3'>Action</th>
+                    <tr className="text-left text-gray-600 border-b">
+                      <th className="pb-3">ID</th>
+                      <th className="pb-3">Name</th>
+                      <th className="pb-3">Email</th>
+                      <th className="pb-3">Phone</th>
+                      <th className="pb-3">Created At</th>
+                      <th className="pb-3">Status</th>
+                      <th className="pb-3">Action</th>
                     </tr>
                   </thead>
                   <tbody>
                     {users
-                      .filter(user => {
+                      .filter((user) => {
+                        // Exclude staff: userType === 1 or has staffRole
+                        if (user.userType === 1 || user.staffRole) return false;
                         const matchesSearch =
-                          user.name.toLowerCase().includes(search.toLowerCase()) ||
-                          user.email.toLowerCase().includes(search.toLowerCase());
+                          user.name
+                            .toLowerCase()
+                            .includes(search.toLowerCase()) ||
+                          user.email
+                            .toLowerCase()
+                            .includes(search.toLowerCase());
                         const matchesStatus =
                           statusFilter === "all" ||
                           (statusFilter === "active" && user.isActive) ||
@@ -98,40 +108,60 @@ export default function page() {
                         return matchesSearch && matchesStatus;
                       })
                       .map((user: User, index: number) => (
-                        <tr key={user.id || index} className='border-b'>
-                        <td className='py-4 text-black font-medium'>{user.id}</td>
-                        <td className='py-4 text-black font-medium'>{user.name}</td>
-                        <td className='py-4 text-black'>{user.email}</td>
-                        <td className='py-4 text-black'>{user.phoneNumber || user.phone || '-'}</td>
-                        <td className='py-4 text-black'>{user.createdAt ? new Date(user.createdAt).toLocaleString() : '-'}</td>
-                        <td className='py-4'>
-                          <span className={`px-3 py-1 rounded-[15px] text-white text-xs ${user.isActive ? 'bg-green-600' : 'bg-gray-400'}`}>
-                            {user.isActive ? 'Active' : 'Inactive'}
-                          </span>
-                        </td>
-                        <td className='py-4'>
-  <div className="flex items-center gap-2">
-    <label className="relative inline-flex items-center cursor-pointer">
-      <input
-        type="checkbox"
-        checked={user.isActive}
-        onChange={async () => {
-          try {
-            await api.toggleUser(user.email);
-            setUsers(users => users.map(u => u.id === user.id ? { ...u, isActive: !u.isActive } : u));
-          } catch (err) {
-            alert('Failed to toggle user');
-          }
-        }}
-        className="sr-only peer"
-      />
-      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-400 rounded-full peer peer-checked:bg-green-500 transition-all"></div>
-      <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full shadow-md transition-all peer-checked:translate-x-5"></div>
-    </label>
-  </div>
-</td>
-                      </tr>
-                    ))}
+                        <tr key={user.id || index} className="border-b">
+                          <td className="py-4 text-black font-medium">
+                            {user.id}
+                          </td>
+                          <td className="py-4 text-black font-medium">
+                            {user.name}
+                          </td>
+                          <td className="py-4 text-black">{user.email}</td>
+                          <td className="py-4 text-black">
+                            {user.phoneNumber || user.phone || "-"}
+                          </td>
+                          <td className="py-4 text-black">
+                            {user.createdAt
+                              ? new Date(user.createdAt).toLocaleString()
+                              : "-"}
+                          </td>
+                          <td className="py-4">
+                            <span
+                              className={`px-3 py-1 rounded-[15px] text-white text-xs ${
+                                user.isActive ? "bg-green-600" : "bg-red-400"
+                              }`}
+                            >
+                              {user.isActive ? "Active" : "Inactive"}
+                            </span>
+                          </td>
+                          <td className="py-4">
+                            <div className="flex items-center gap-2">
+                              <label className="relative inline-flex items-center cursor-pointer">
+                                <input
+                                  type="checkbox"
+                                  checked={user.isActive}
+                                  onChange={async () => {
+                                    try {
+                                      await api.toggleUser(user.email);
+                                      setUsers((users) =>
+                                        users.map((u) =>
+                                          u.id === user.id
+                                            ? { ...u, isActive: !u.isActive }
+                                            : u
+                                        )
+                                      );
+                                    } catch (err) {
+                                      alert("Failed to toggle user");
+                                    }
+                                  }}
+                                  className="sr-only peer"
+                                />
+                                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer dark:bg-gray-700 peer-checked:bg-green-600 transition-all"></div>
+                                <div className="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-all peer-checked:translate-x-full"></div>
+                              </label>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
                   </tbody>
                 </table>
               </div>

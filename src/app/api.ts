@@ -22,8 +22,6 @@ type Organization = {
 };
 
 class JoaliApi {
-  
-
   baseUrl: string;
   apiKey: string;
   headers: Record<string, string>;
@@ -32,27 +30,28 @@ class JoaliApi {
   constructor(baseUrl: string, apiKey: string) {
     this.baseUrl = baseUrl;
     this.apiKey = apiKey;
-    this.tokenKey = '';
-    this.headers = { "Content-Type": "application/json", 'Authorization': `Bearer ${this.getAccessToken()}` };
+    this.tokenKey = "";
+    this.headers = {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${this.getAccessToken()}`,
+    };
   }
 
-  
-
   setAccessToken(token: string) {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       localStorage.setItem(this.tokenKey, token);
     }
   }
 
   getAccessToken(): string | null {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       return localStorage.getItem(this.tokenKey);
     }
     return null;
   }
 
   clearAccessToken() {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       localStorage.removeItem(this.tokenKey);
     }
   }
@@ -73,43 +72,65 @@ class JoaliApi {
     if (data.token && data.token.accessToken) {
       this.setAccessToken(data.token.accessToken);
     }
-    
+
     return data;
   }
 
-  async customerRegister({ name, email, phone, password, passwordConfirm }: { name: string; email: string; phone: string; password: string; passwordConfirm: string }) {
-    const res = await fetch(`${this.baseUrl}/api/User/CustomerRegister?apiKey=${this.apiKey}`, {
-      method: "POST",
-      headers: this.headers,
-      body: JSON.stringify({ name, email, phone, password, passwordConfirm }),
-    });
+  async customerRegister({
+    name,
+    email,
+    phone,
+    password,
+    passwordConfirm,
+  }: {
+    name: string;
+    email: string;
+    phone: string;
+    password: string;
+    passwordConfirm: string;
+  }) {
+    const res = await fetch(
+      `${this.baseUrl}/api/User/CustomerRegister?apiKey=${this.apiKey}`,
+      {
+        method: "POST",
+        headers: this.headers,
+        body: JSON.stringify({ name, email, phone, password, passwordConfirm }),
+      }
+    );
     const data = await res.json();
     if (!res.ok) {
       console.error("Registration error:", data);
-      throw new Error(data.message || JSON.stringify(data) || "Registration failed");
+      throw new Error(
+        data.message || JSON.stringify(data) || "Registration failed"
+      );
     }
     return data;
   }
 
   async getAllUsers() {
-    const res = await fetch(`${this.baseUrl}/api/User/AllUsers?apiKey=${this.apiKey}`, {
-      method: "GET",
-      headers: this.headers,
-    });
+    const res = await fetch(
+      `${this.baseUrl}/api/User/AllUsers?apiKey=${this.apiKey}`,
+      {
+        method: "GET",
+        headers: this.headers,
+      }
+    );
     const data = await res.json();
     if (!res.ok) {
       console.error("Get users error:", data);
-      throw new Error(data.message || JSON.stringify(data) || "Failed to fetch users");
+      throw new Error(
+        data.message || JSON.stringify(data) || "Failed to fetch users"
+      );
     }
     return data;
   }
 
   async logout() {
     const accessToken = this.getAccessToken();
-    if (!accessToken) throw new Error('No access token found');
+    if (!accessToken) throw new Error("No access token found");
     const res = await fetch(`${this.baseUrl}/api/Auth/Logout`, {
       method: "POST",
-      headers: this.headers
+      headers: this.headers,
     });
     const data = await res.json();
     if (!res.ok) {
@@ -121,22 +142,47 @@ class JoaliApi {
   }
 
   async toggleUser(email: string) {
-    const res = await fetch(`${this.baseUrl}/api/User/ToggleUser?apiKey=${this.apiKey}&Email=${email}`, {
-      method: "POST",
-      headers: this.headers,
-    });
+    const res = await fetch(
+      `${this.baseUrl}/api/User/ToggleUser?apiKey=${this.apiKey}&Email=${email}`,
+      {
+        method: "POST",
+        headers: this.headers,
+      }
+    );
     const data = await res.json();
     if (!res.ok) {
-      throw new Error(data.message || 'Failed to toggle user');
+      throw new Error(data.message || "Failed to toggle user");
     }
     return data;
   }
 
-  async getAllOrganizations(orgType?: number): Promise<Organization[]> {
-    const res = await fetch(`${this.baseUrl}/api/Organization?orgtype=${orgType || ''}`, {
+  async getOrganizationById(id: number): Promise<Organization | null> {
+    const res = await fetch(`${this.baseUrl}/api/Organization/${id}`, {
       method: "GET",
-      headers: this.headers
+      headers: this.headers,
     });
+    let data: Organization | null = null;
+    const text = await res.text();
+    try {
+      data = text ? JSON.parse(text) : null;
+    } catch (e) {
+      data = null;
+    }
+    if (!res.ok)
+      throw new Error(
+        (data && (data as any).message) || "Failed to fetch organization"
+      );
+    return data;
+  }
+
+  async getAllOrganizations(orgType?: number): Promise<Organization[]> {
+    const res = await fetch(
+      `${this.baseUrl}/api/Organization?orgtype=${orgType || ""}`,
+      {
+        method: "GET",
+        headers: this.headers,
+      }
+    );
     let data: Organization[] = [];
     const text = await res.text();
     try {
@@ -148,7 +194,17 @@ class JoaliApi {
     return data;
   }
 
-  async createOrganization(org: Omit<Organization, 'id' | 'createdAt' | 'updatedAt' | 'parentOrganizationId' | 'parentOrganization' | 'isActive'>) {
+  async createOrganization(
+    org: Omit<
+      Organization,
+      | "id"
+      | "createdAt"
+      | "updatedAt"
+      | "parentOrganizationId"
+      | "parentOrganization"
+      | "isActive"
+    >
+  ) {
     const res = await fetch(`${this.baseUrl}/api/Organization/Create`, {
       method: "POST",
       headers: this.headers,
@@ -161,7 +217,10 @@ class JoaliApi {
     } catch (e) {
       data = null;
     }
-    if (!res.ok) throw new Error((data && data.message) || 'Failed to create organization');
+    if (!res.ok)
+      throw new Error(
+        (data && data.message) || "Failed to create organization"
+      );
     return data;
   }
 }
