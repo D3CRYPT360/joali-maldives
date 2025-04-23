@@ -39,9 +39,9 @@ export default function login_page() {
         }
       }
       if (userId) {
-        window.location.href = `/home/${userId}`;
+        router.push(`/home/${userId}`);
       } else {
-        window.location.href = "/";
+        router.push("/");
       }
     } catch (err: any) {
       setError(err.message || "Login failed");

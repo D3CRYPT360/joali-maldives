@@ -1,9 +1,11 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { api } from "../app/api";
 
 const Navbar = () => {
+  const router = useRouter();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -21,7 +23,7 @@ const Navbar = () => {
     try {
       await api.logout();
       setIsLoggedIn(false);
-      window.location.href = "/";
+      router.push("/");
     } catch (err) {
       alert((err as any).message || "Logout failed");
       setLoading(false);
@@ -49,11 +51,8 @@ const Navbar = () => {
           <a href="/hotels" className="hover:text-opacity-80">
             Hotels
           </a>
-          <a href="#" className="hover:text-opacity-80">
+          <a href="/about" className="hover:text-opacity-80">
             About
-          </a>
-          <a href="#" className="hover:text-opacity-80">
-            Contact
           </a>
           <Link href="/dashboard" className="hover:text-opacity-80">
             Dashboard

@@ -52,6 +52,7 @@ const Organizations = () => {
   const [formLoading, setFormLoading] = useState(false);
   const [formError, setFormError] = useState("");
   const [formSuccess, setFormSuccess] = useState("");
+  
 
   useEffect(() => {
     async function fetchOrgs() {
@@ -147,6 +148,7 @@ const Organizations = () => {
                       <th className="pb-3">Country</th>
                       <th className="pb-3">Status</th>
                       <th className="pb-3">Created</th>
+                      <th className="pb-3">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -180,10 +182,36 @@ const Organizations = () => {
                           </span>
                         </td>
                         <td className="py-4 text-black">
-                          {org.createdAt
-                            ? new Date(org.createdAt).toLocaleDateString()
-                            : "-"}
+                          {org.createdAt ? new Date(org.createdAt).toISOString().slice(0, 10) : "-"}
                         </td>
+                        <td className="py-4">
+                        <div className="flex items-center gap-2">
+                          {/* Toggle Switch */}
+                            <label className="relative inline-flex items-center cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={org.isActive}
+                                onChange={async () => {
+                                  try {
+                                    await api.toggleOrganization(org.id);
+                                    setOrgs((orgs) =>
+                                      orgs.map((o) =>
+                                        o.id === org.id
+                                          ? { ...o, isActive: !o.isActive }
+                                          : o
+                                      )
+                                    );
+                                  } catch (err) {
+                                    alert("Failed to toggle organization");
+                                  }
+                                }}
+                                className="sr-only peer"
+                              />
+                              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer dark:bg-gray-700 peer-checked:bg-green-600 transition-all"></div>
+                              <div className="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-all peer-checked:translate-x-full"></div>
+                            </label>
+                        </div>
+                      </td>
                       </tr>
                     ))}
                   </tbody>

@@ -36,7 +36,7 @@ class JoaliApi {
       Authorization: `Bearer ${this.getAccessToken()}`,
     };
   }
-
+  
   setAccessToken(token: string) {
     if (typeof window !== "undefined") {
       localStorage.setItem(this.tokenKey, token);
@@ -145,7 +145,7 @@ class JoaliApi {
     const res = await fetch(
       `${this.baseUrl}/api/User/ToggleUser?apiKey=${this.apiKey}&Email=${email}`,
       {
-        method: "POST",
+        method: "GET",
         headers: this.headers,
       }
     );
@@ -154,6 +154,22 @@ class JoaliApi {
       throw new Error(data.message || "Failed to toggle user");
     }
     return data;
+  }
+
+  async toggleOrganization(id: number) {
+  console.log(id)
+  const res = await fetch(
+    `${this.baseUrl}/api/Organization/toggle/${id}`,
+    {
+      method: "GET",
+      headers: this.headers,
+    }
+  );
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data.message || "Failed to toggle organization");
+  }
+  return data;
   }
 
   async getOrganizationById(id: number): Promise<Organization | null> {
@@ -223,7 +239,28 @@ class JoaliApi {
       );
     return data;
   }
+
+  async createStaff(staff: {
+    name: string;
+    email: string;
+    phoneNumber: string;
+    orgId: number;
+  }) {
+    const res = await fetch(`${this.baseUrl}/api/User/NewStaff?apiKey=${this.apiKey}`, {
+      method: "POST",
+      headers: this.headers,
+      body: JSON.stringify(staff),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.message || "Failed to create staff");
+    }
+    return data;
+  }
 }
+
+
+
 
 // Export a singleton instance
 export const api = new JoaliApi(API_BASE, API_KEY);
