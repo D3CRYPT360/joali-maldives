@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import SideBar from "@/components/SideBar";
-import { api } from "../api";
+import { api } from "../../services/api";
 
 type Staff = {
   id: number;
@@ -26,7 +26,7 @@ export default function StaffsPage() {
   // Filtered staff list based on search
   const filteredStaffs = staffs.filter((staff) => {
     // Ensure orgId is never null/undefined before toString
-    const safeOrgId = staff.orgId ?? '';
+    const safeOrgId = staff.orgId ?? "";
     const orgName = orgNames[safeOrgId] || safeOrgId.toString();
     const searchLower = search.toLowerCase();
     return (
@@ -38,7 +38,12 @@ export default function StaffsPage() {
 
   // Modal and form state
   const [showModal, setShowModal] = useState(false);
-  const [form, setForm] = useState<{ name: string; email: string; phoneNumber: string; orgId: string }>({
+  const [form, setForm] = useState<{
+    name: string;
+    email: string;
+    phoneNumber: string;
+    orgId: string;
+  }>({
     name: "",
     email: "",
     phoneNumber: "",
@@ -46,13 +51,19 @@ export default function StaffsPage() {
   });
   const [formError, setFormError] = useState("");
   const [formLoading, setFormLoading] = useState(false);
-  const [orgOptions, setOrgOptions] = useState<{ id: number; name: string }[]>([]);
+  const [orgOptions, setOrgOptions] = useState<{ id: number; name: string }[]>(
+    []
+  );
 
   // Fetch organizations for dropdown when modal opens
   useEffect(() => {
     if (showModal) {
       api.getAllOrganizations().then((orgs) => {
-        setOrgOptions(Array.isArray(orgs) ? orgs.map((o: any) => ({ id: o.id, name: o.name })) : []);
+        setOrgOptions(
+          Array.isArray(orgs)
+            ? orgs.map((o: any) => ({ id: o.id, name: o.name }))
+            : []
+        );
       });
     }
   }, [showModal]);
@@ -109,7 +120,7 @@ export default function StaffsPage() {
                   type="text"
                   placeholder="Search staffs..."
                   value={search}
-                  onChange={e => setSearch(e.target.value)}
+                  onChange={(e) => setSearch(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:border-[#8B4513]"
                 />
               </div>
@@ -134,8 +145,14 @@ export default function StaffsPage() {
                   >
                     &times;
                   </button>
-                  <h2 className="text-2xl font-bold mb-4 text-[#8B4513] text-center">Add New Staff</h2>
-                  {formError && <div className="text-red-600 mb-2 text-center">{formError}</div>}
+                  <h2 className="text-2xl font-bold mb-4 text-[#8B4513] text-center">
+                    Add New Staff
+                  </h2>
+                  {formError && (
+                    <div className="text-red-600 mb-2 text-center">
+                      {formError}
+                    </div>
+                  )}
                   <form
                     onSubmit={async (e) => {
                       e.preventDefault();
@@ -149,7 +166,12 @@ export default function StaffsPage() {
                           orgId: Number(form.orgId),
                         });
                         setShowModal(false);
-                        setForm({ name: "", email: "", phoneNumber: "", orgId: "" });
+                        setForm({
+                          name: "",
+                          email: "",
+                          phoneNumber: "",
+                          orgId: "",
+                        });
                         fetchStaffs();
                       } catch (err: any) {
                         setFormError(err.message || "Failed to create staff");
@@ -160,50 +182,82 @@ export default function StaffsPage() {
                     className="space-y-4"
                   >
                     <div>
-                      <label className="block mb-1 font-semibold" htmlFor="staff-name">Name</label>
+                      <label
+                        className="block mb-1 font-semibold"
+                        htmlFor="staff-name"
+                      >
+                        Name
+                      </label>
                       <input
                         id="staff-name"
                         type="text"
                         className="w-full border px-3 py-2 rounded focus:outline-none focus:ring"
                         value={form.name}
-                        onChange={e => setForm({ ...form, name: e.target.value })}
+                        onChange={(e) =>
+                          setForm({ ...form, name: e.target.value })
+                        }
                         required
                       />
                     </div>
                     <div>
-                      <label className="block mb-1 font-semibold" htmlFor="staff-email">Email</label>
+                      <label
+                        className="block mb-1 font-semibold"
+                        htmlFor="staff-email"
+                      >
+                        Email
+                      </label>
                       <input
                         id="staff-email"
                         type="email"
                         className="w-full border px-3 py-2 rounded focus:outline-none focus:ring"
                         value={form.email}
-                        onChange={e => setForm({ ...form, email: e.target.value })}
+                        onChange={(e) =>
+                          setForm({ ...form, email: e.target.value })
+                        }
                         required
                       />
                     </div>
                     <div>
-                      <label className="block mb-1 font-semibold" htmlFor="staff-phone">Phone Number</label>
+                      <label
+                        className="block mb-1 font-semibold"
+                        htmlFor="staff-phone"
+                      >
+                        Phone Number
+                      </label>
                       <input
                         id="staff-phone"
                         type="tel"
                         className="w-full border px-3 py-2 rounded focus:outline-none focus:ring"
                         value={form.phoneNumber}
-                        onChange={e => setForm({ ...form, phoneNumber: e.target.value })}
+                        onChange={(e) =>
+                          setForm({ ...form, phoneNumber: e.target.value })
+                        }
                         required
                       />
                     </div>
                     <div>
-                      <label className="block mb-1 font-semibold" htmlFor="staff-org">Organization</label>
+                      <label
+                        className="block mb-1 font-semibold"
+                        htmlFor="staff-org"
+                      >
+                        Organization
+                      </label>
                       <select
                         id="staff-org"
                         className="w-full border px-3 py-2 rounded focus:outline-none focus:ring"
                         value={form.orgId}
-                        onChange={e => setForm({ ...form, orgId: e.target.value })}
+                        onChange={(e) =>
+                          setForm({ ...form, orgId: e.target.value })
+                        }
                         required
                       >
-                        <option value="" disabled>Select organization</option>
+                        <option value="" disabled>
+                          Select organization
+                        </option>
                         {orgOptions.map((org) => (
-                          <option key={org.id} value={org.id}>{org.name}</option>
+                          <option key={org.id} value={org.id}>
+                            {org.name}
+                          </option>
                         ))}
                       </select>
                     </div>
@@ -259,11 +313,20 @@ export default function StaffsPage() {
                           <td className="py-4 text-black">
                             {staff.staffRole || "-"}
                           </td>
-                          <td className="py-4 text-black" data-raw-date={staff.createdAt ?? ''}>
+                          <td
+                            className="py-4 text-black"
+                            data-raw-date={staff.createdAt ?? ""}
+                          >
                             {/* DEBUG: Hydration - server/client date match check */}
-                            {staff.createdAt && !isNaN(Date.parse(staff.createdAt))
-                              ? new Date(staff.createdAt).toISOString().replace('T',' ').slice(0,16)
-                              : (staff.createdAt ? staff.createdAt : "-")}
+                            {staff.createdAt &&
+                            !isNaN(Date.parse(staff.createdAt))
+                              ? new Date(staff.createdAt)
+                                  .toISOString()
+                                  .replace("T", " ")
+                                  .slice(0, 16)
+                              : staff.createdAt
+                              ? staff.createdAt
+                              : "-"}
                           </td>
                           <td className="py-4">
                             <span

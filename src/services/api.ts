@@ -1,42 +1,24 @@
-// API utility using a class-based system for better structure and reusability
-
-const API_BASE = "http://144.91.126.109:5000";
-const API_KEY = "sk-8fj29dk3nf03jfldkf0293jf02ldkf03";
-
-type Organization = {
-  id: number;
-  name: string;
-  registrationNumber: string;
-  email: string;
-  phone: string;
-  address: string;
-  country: string;
-  website?: string;
-  logoUrl?: string;
-  isActive: boolean;
-  createdAt?: string;
-  updatedAt?: string | null;
-  parentOrganizationId?: number | null;
-  parentOrganization?: any | null;
-  type: number;
-};
+import { API_BASE, API_KEY } from "../types/types";
+import type { Organization, CustomerRegisterParams } from "../types/types";
 
 class JoaliApi {
   baseUrl: string;
   apiKey: string;
-  headers: Record<string, string>;
   tokenKey: string;
 
   constructor(baseUrl: string, apiKey: string) {
     this.baseUrl = baseUrl;
     this.apiKey = apiKey;
-    this.tokenKey = "";
-    this.headers = {
+    this.tokenKey = "accessToken";
+  }
+
+  getAuthHeaders(): Record<string, string> {
+    return {
       "Content-Type": "application/json",
       Authorization: `Bearer ${this.getAccessToken()}`,
     };
   }
-  
+
   setAccessToken(token: string) {
     if (typeof window !== "undefined") {
       localStorage.setItem(this.tokenKey, token);
@@ -59,7 +41,7 @@ class JoaliApi {
   async login({ email, password }: { email: string; password: string }) {
     const res = await fetch(`${this.baseUrl}/api/Auth/Login`, {
       method: "POST",
-      headers: this.headers,
+      headers: this.getAuthHeaders(),
       body: JSON.stringify({ email, password, apiKey: this.apiKey }),
     });
     const data = await res.json();
@@ -76,25 +58,13 @@ class JoaliApi {
     return data;
   }
 
-  async customerRegister({
-    name,
-    email,
-    phone,
-    password,
-    passwordConfirm,
-  }: {
-    name: string;
-    email: string;
-    phone: string;
-    password: string;
-    passwordConfirm: string;
-  }) {
+  async customerRegister(params: CustomerRegisterParams) {
     const res = await fetch(
       `${this.baseUrl}/api/User/CustomerRegister?apiKey=${this.apiKey}`,
       {
         method: "POST",
-        headers: this.headers,
-        body: JSON.stringify({ name, email, phone, password, passwordConfirm }),
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify(params),
       }
     );
     const data = await res.json();
@@ -112,7 +82,7 @@ class JoaliApi {
       `${this.baseUrl}/api/User/AllUsers?apiKey=${this.apiKey}`,
       {
         method: "GET",
-        headers: this.headers,
+        headers: this.getAuthHeaders(),
       }
     );
     const data = await res.json();
@@ -130,7 +100,7 @@ class JoaliApi {
     if (!accessToken) throw new Error("No access token found");
     const res = await fetch(`${this.baseUrl}/api/Auth/Logout`, {
       method: "POST",
-      headers: this.headers,
+      headers: this.getAuthHeaders(),
     });
     const data = await res.json();
     if (!res.ok) {
@@ -145,8 +115,8 @@ class JoaliApi {
     const res = await fetch(
       `${this.baseUrl}/api/User/ToggleUser?apiKey=${this.apiKey}&Email=${email}`,
       {
-        method: "GET",
-        headers: this.headers,
+        method: "PUT",
+        headers: this.getAuthHeaders(),
       }
     );
     const data = await res.json();
@@ -157,25 +127,22 @@ class JoaliApi {
   }
 
   async toggleOrganization(id: number) {
-  console.log(id)
-  const res = await fetch(
-    `${this.baseUrl}/api/Organization/toggle/${id}`,
-    {
-      method: "GET",
-      headers: this.headers,
+    console.log(id);
+    const res = await fetch(`${this.baseUrl}/api/Organization/toggle/${id}`, {
+      method: "PUT",
+      headers: this.getAuthHeaders(),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.message || "Failed to toggle organization");
     }
-  );
-  const data = await res.json();
-  if (!res.ok) {
-    throw new Error(data.message || "Failed to toggle organization");
-  }
-  return data;
+    return data;
   }
 
   async getOrganizationById(id: number): Promise<Organization | null> {
     const res = await fetch(`${this.baseUrl}/api/Organization/${id}`, {
       method: "GET",
-      headers: this.headers,
+      headers: this.getAuthHeaders(),
     });
     let data: Organization | null = null;
     const text = await res.text();
@@ -196,7 +163,7 @@ class JoaliApi {
       `${this.baseUrl}/api/Organization?orgtype=${orgType || ""}`,
       {
         method: "GET",
-        headers: this.headers,
+        headers: this.getAuthHeaders(),
       }
     );
     let data: Organization[] = [];
@@ -223,7 +190,7 @@ class JoaliApi {
   ) {
     const res = await fetch(`${this.baseUrl}/api/Organization/Create`, {
       method: "POST",
-      headers: this.headers,
+      headers: this.getAuthHeaders(),
       body: JSON.stringify(org),
     });
     let data = null;
@@ -240,17 +207,44 @@ class JoaliApi {
     return data;
   }
 
+  async resetInitialPassword(
+    email: string,
+    temporaryKey: string,
+    newPassword: string
+  ) {
+    const res = await fetch(`${this.baseUrl}/api/Auth/ResetPassword`, {
+      method: "POST",
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify({ email, temporaryKey, newPassword }),
+    });
+    let data = null;
+    const text = await res.text();
+    try {
+      data = text ? JSON.parse(text) : null;
+    } catch (e) {
+      data = null;
+    }
+    if (!res.ok)
+      throw new Error(
+        (data && data.message) || "Failed to reset initial password"
+      );
+    return data;
+  }
+
   async createStaff(staff: {
     name: string;
     email: string;
     phoneNumber: string;
     orgId: number;
   }) {
-    const res = await fetch(`${this.baseUrl}/api/User/NewStaff?apiKey=${this.apiKey}`, {
-      method: "POST",
-      headers: this.headers,
-      body: JSON.stringify(staff),
-    });
+    const res = await fetch(
+      `${this.baseUrl}/api/User/NewStaff?apiKey=${this.apiKey}`,
+      {
+        method: "POST",
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify(staff),
+      }
+    );
     const data = await res.json();
     if (!res.ok) {
       throw new Error(data.message || "Failed to create staff");
@@ -258,9 +252,6 @@ class JoaliApi {
     return data;
   }
 }
-
-
-
 
 // Export a singleton instance
 export const api = new JoaliApi(API_BASE, API_KEY);

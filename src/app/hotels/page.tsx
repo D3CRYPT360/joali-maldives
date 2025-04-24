@@ -1,7 +1,7 @@
 "use client";
 import ActivityCard from "@/components/ActivityCard";
 
-import { api } from "../api";
+import { api } from "../../services/api";
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 

@@ -9,30 +9,6 @@ import { GrUserWorker } from "react-icons/gr";
 
 export default function SideBar() {
   const [open, setOpen] = useState(true);
-  const [submenuOpen, setSubmenuOpen] = useState(false);
-  const Menus = [
-    { title: "Dashboard" },
-    {
-      title: "Users",
-      submenu: true,
-      submenuItems: [
-        { title: "Themepark Owners" },
-        { title: "Ferry Operators" },
-        { title: "Beach Owners" },
-        { title: "Customers" },
-      ],
-    },
-    { title: "Hotel Owners" },
-    { title: "Booking Details" },
-    { title: "Refunds" },
-
-    { title: "Messages", spacing: true },
-    { title: "Help" },
-    { title: "Settings" },
-  ];
-
-  const [users, setUsers] = useState(1);
-  const [saved, setSaved] = useState(1);
 
   return (
     <div className="flex">

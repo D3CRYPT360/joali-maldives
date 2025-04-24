@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import React, { useState } from "react";
-import { api } from "../api";
+import { api } from "../../services/api";
 import { useRouter } from "next/navigation";
 import { jwtDecode } from "jwt-decode";
 
@@ -25,9 +25,22 @@ export default function login_page() {
     }
     try {
       const data = await api.login({ email, password });
+      // Check for initial password setup redirect
+      if (data.message === "RedirectToInitialPasswordPage" && data.data) {
+        const { email, code } = data.data;
+        router.push(
+          `/initial-password-setup?email=${encodeURIComponent(
+            email
+          )}&code=${encodeURIComponent(code)}`
+        );
+        return;
+      }
       setSuccess(data.message || "Login successful!");
-      // Get access token from localStorage
-      const accessToken = api.getAccessToken();
+      // Store access token in localStorage if present in response
+      if (data.accessToken) {
+        localStorage.setItem("accessToken", data.accessToken);
+      }
+      const accessToken = data.accessToken || api.getAccessToken();
       let userId = "";
       if (accessToken) {
         const decoded = jwtDecode(accessToken) as { [key: string]: any };
@@ -92,7 +105,7 @@ export default function login_page() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-black">
                 Password
               </label>
               <input

@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { api } from "../app/api";
+import { api } from "../services/api";
 
 const Navbar = () => {
   const router = useRouter();
@@ -22,11 +22,17 @@ const Navbar = () => {
     setLoading(true);
     try {
       await api.logout();
-      setIsLoggedIn(false);
-      router.push("/");
     } catch (err) {
       alert((err as any).message || "Logout failed");
+    } finally {
+      // Always clear session and update UI
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem(""); // Remove any token stored under an empty key
+      localStorage.removeItem("user_id");
+      localStorage.removeItem("user_name");
+      setIsLoggedIn(false);
       setLoading(false);
+      window.location.href = "/"; // Redirect to home
     }
   };
 

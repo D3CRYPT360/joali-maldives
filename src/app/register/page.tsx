@@ -2,7 +2,7 @@
 import Link from "next/link";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { api } from "../api";
+import { api } from "../../services/api";
 
 export default function register_page() {
   const router = useRouter();
