@@ -2,14 +2,62 @@ import { API_BASE, API_KEY } from "../types/types";
 import type { Organization, CustomerRegisterParams } from "../types/types";
 
 class JoaliApi {
+  async refreshTokenIfNeeded(): Promise<boolean> {
+    const accessToken = this.getAccessToken();
+    const refreshToken = this.getRefreshToken();
+    if (!accessToken || !refreshToken) return false;
+    const res = await fetch(`${this.baseUrl}/api/Auth/RefreshToken`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ accessToken, refreshToken }),
+    });
+    const data = await res.json();
+    if (
+      res.ok &&
+      data.token &&
+      data.token.accessToken &&
+      data.token.refreshToken
+    ) {
+      this.setToken(
+        data.token.accessToken,
+        data.token.refreshToken,
+        data.token.role
+      );
+      return true;
+    }
+    this.clearTokens();
+    return false;
+  }
+
+  // Wrapper for fetch with auto token refresh
+  async fetchWithAuth(input: RequestInfo, init?: RequestInit, retry = true) {
+    let res = await fetch(input, init);
+    if (res.status === 401 && retry) {
+      const refreshed = await this.refreshTokenIfNeeded();
+      if (refreshed) {
+        // Update Authorization header
+        if (init && init.headers) {
+          (init.headers as Record<string, string>)[
+            "Authorization"
+          ] = `Bearer ${this.getAccessToken()}`;
+        }
+        res = await fetch(input, init);
+      }
+    }
+    return res;
+  }
   baseUrl: string;
   apiKey: string;
   tokenKey: string;
+  refreshKey: string;
+  roleKey: string;
 
   constructor(baseUrl: string, apiKey: string) {
     this.baseUrl = baseUrl;
     this.apiKey = apiKey;
     this.tokenKey = "accessToken";
+    this.refreshKey = "refreshToken";
+    this.roleKey = "Role";
   }
 
   getAuthHeaders(): Record<string, string> {
@@ -19,9 +67,19 @@ class JoaliApi {
     };
   }
 
-  setAccessToken(token: string) {
+  setLocalStorage(accessToken: string, refreshToken: string, Role: string) {
     if (typeof window !== "undefined") {
-      localStorage.setItem(this.tokenKey, token);
+      localStorage.setItem(this.tokenKey, accessToken);
+      localStorage.setItem(this.refreshKey, refreshToken);
+      localStorage.setItem(this.roleKey, Role);
+    }
+  }
+
+  clearTokens(): void {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem(this.tokenKey);
+      localStorage.removeItem(this.refreshKey);
+      localStorage.removeItem(this.roleKey);
     }
   }
 
@@ -32,10 +90,11 @@ class JoaliApi {
     return null;
   }
 
-  clearAccessToken() {
+  getRefreshToken(): string | null {
     if (typeof window !== "undefined") {
-      localStorage.removeItem(this.tokenKey);
+      return localStorage.getItem(this.refreshKey);
     }
+    return null;
   }
 
   async login({ email, password }: { email: string; password: string }) {
@@ -53,6 +112,9 @@ class JoaliApi {
     // Cache accessToken in localStorage
     if (data.token && data.token.accessToken) {
       this.setAccessToken(data.token.accessToken);
+    }
+    if (data.token && data.token.refreshToken) {
+      this.setRefreshToken(data.token.refreshToken);
     }
 
     return data;
@@ -78,7 +140,7 @@ class JoaliApi {
   }
 
   async getAllUsers() {
-    const res = await fetch(
+    const res = await this.fetchWithAuth(
       `${this.baseUrl}/api/User/AllUsers?apiKey=${this.apiKey}`,
       {
         method: "GET",
@@ -98,7 +160,7 @@ class JoaliApi {
   async logout() {
     const accessToken = this.getAccessToken();
     if (!accessToken) throw new Error("No access token found");
-    const res = await fetch(`${this.baseUrl}/api/Auth/Logout`, {
+    const res = await this.fetchWithAuth(`${this.baseUrl}/api/Auth/Logout`, {
       method: "POST",
       headers: this.getAuthHeaders(),
     });
@@ -112,7 +174,7 @@ class JoaliApi {
   }
 
   async toggleUser(email: string) {
-    const res = await fetch(
+    const res = await this.fetchWithAuth(
       `${this.baseUrl}/api/User/ToggleUser?apiKey=${this.apiKey}&Email=${email}`,
       {
         method: "PUT",
@@ -128,10 +190,13 @@ class JoaliApi {
 
   async toggleOrganization(id: number) {
     console.log(id);
-    const res = await fetch(`${this.baseUrl}/api/Organization/toggle/${id}`, {
-      method: "PUT",
-      headers: this.getAuthHeaders(),
-    });
+    const res = await this.fetchWithAuth(
+      `${this.baseUrl}/api/Organization/toggle/${id}`,
+      {
+        method: "PUT",
+        headers: this.getAuthHeaders(),
+      }
+    );
     const data = await res.json();
     if (!res.ok) {
       throw new Error(data.message || "Failed to toggle organization");
@@ -140,10 +205,13 @@ class JoaliApi {
   }
 
   async getOrganizationById(id: number): Promise<Organization | null> {
-    const res = await fetch(`${this.baseUrl}/api/Organization/${id}`, {
-      method: "GET",
-      headers: this.getAuthHeaders(),
-    });
+    const res = await this.fetchWithAuth(
+      `${this.baseUrl}/api/Organization/${id}`,
+      {
+        method: "GET",
+        headers: this.getAuthHeaders(),
+      }
+    );
     let data: Organization | null = null;
     const text = await res.text();
     try {
@@ -159,7 +227,7 @@ class JoaliApi {
   }
 
   async getAllOrganizations(orgType?: number): Promise<Organization[]> {
-    const res = await fetch(
+    const res = await this.fetchWithAuth(
       `${this.baseUrl}/api/Organization?orgtype=${orgType || ""}`,
       {
         method: "GET",
@@ -188,11 +256,14 @@ class JoaliApi {
       | "isActive"
     >
   ) {
-    const res = await fetch(`${this.baseUrl}/api/Organization/Create`, {
-      method: "POST",
-      headers: this.getAuthHeaders(),
-      body: JSON.stringify(org),
-    });
+    const res = await this.fetchWithAuth(
+      `${this.baseUrl}/api/Organization/Create`,
+      {
+        method: "POST",
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify(org),
+      }
+    );
     let data = null;
     const text = await res.text();
     try {
@@ -212,11 +283,14 @@ class JoaliApi {
     temporaryKey: string,
     newPassword: string
   ) {
-    const res = await fetch(`${this.baseUrl}/api/Auth/ResetPassword`, {
-      method: "POST",
-      headers: this.getAuthHeaders(),
-      body: JSON.stringify({ email, temporaryKey, newPassword }),
-    });
+    const res = await this.fetchWithAuth(
+      `${this.baseUrl}/api/Auth/ResetPassword`,
+      {
+        method: "POST",
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify({ email, temporaryKey, newPassword }),
+      }
+    );
     let data = null;
     const text = await res.text();
     try {
@@ -237,7 +311,7 @@ class JoaliApi {
     phoneNumber: string;
     orgId: number;
   }) {
-    const res = await fetch(
+    const res = await this.fetchWithAuth(
       `${this.baseUrl}/api/User/NewStaff?apiKey=${this.apiKey}`,
       {
         method: "POST",
