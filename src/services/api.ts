@@ -439,6 +439,92 @@ class JoaliApi {
     }
     return data;
   }
+
+  // --- ServiceOrder APIs ---
+
+  /**
+   * Place a new service order
+   * @param order { serviceId: number, quantity: number, scheduledFor: string }
+   */
+  async placeServiceOrder(order: { serviceId: number; quantity: number; scheduledFor: string }) {
+    const res = await this.fetchWithAuth(
+      `${this.baseUrl}/api/ServiceOrder/place`,
+      {
+        method: "POST",
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify(order),
+      }
+    );
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.message || "Failed to place order");
+    }
+    return data;
+  }
+
+  /**
+   * Get orders for the current user
+   */
+  async getMyServiceOrders() {
+    const res = await this.fetchWithAuth(
+      `${this.baseUrl}/api/ServiceOrder/my-orders`,
+      {
+        method: "GET",
+        headers: this.getAuthHeaders(),
+      }
+    );
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.message || "Failed to fetch your orders");
+    }
+    return data;
+  }
+
+  /**
+   * Get all service orders (admin/org)
+   * @param params Optional: { orgId?: number, status?: number, from?: string, to?: string }
+   */
+  async getAllServiceOrders(params?: { orgId?: number; status?: number; from?: string; to?: string }) {
+    const query = params
+      ? '?' + Object.entries(params)
+          .filter(([_, v]) => v !== undefined && v !== null && v !== "")
+          .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v as string)}`)
+          .join('&')
+      : '';
+    const res = await this.fetchWithAuth(
+      `${this.baseUrl}/api/ServiceOrder/all${query}`,
+      {
+        method: "GET",
+        headers: this.getAuthHeaders(),
+      }
+    );
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.message || "Failed to fetch all orders");
+    }
+    return data;
+  }
+
+  /**
+   * Update the status of a service order
+   * @param id Order ID
+   * @param status New status (number)
+   */
+  async updateServiceOrderStatus(id: number, status: number) {
+    const res = await this.fetchWithAuth(
+      `${this.baseUrl}/api/ServiceOrder/update-status/${id}`,
+      {
+        method: "PUT",
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify({ status }),
+      }
+    );
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.message || "Failed to update order status");
+    }
+    return data;
+  }
 }
 
 // Export a singleton instance

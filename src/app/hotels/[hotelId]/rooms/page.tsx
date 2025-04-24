@@ -4,6 +4,8 @@ import Image from "next/image";
 
 import { api } from "@/services/api";
 import { useEffect, useState } from "react";
+import BookingScreen from "./BookingScreen";
+import { useRouter } from "next/navigation";
 
 type Room = {
   id: number;
@@ -44,6 +46,8 @@ export default function HotelRoomsPage({
   const [rooms, setRooms] = useState<Room[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [bookingRoom, setBookingRoom] = useState<Room | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     setLoading(true);
@@ -61,6 +65,10 @@ export default function HotelRoomsPage({
         setLoading(false);
       });
   }, [hotelId]);
+
+  if (bookingRoom) {
+    return <BookingScreen room={bookingRoom} hotelId={hotelId} />;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#f8f3f1] to-[#f7f5f3] py-16">
@@ -100,7 +108,10 @@ export default function HotelRoomsPage({
                     <span className="text-lg font-bold text-[#152C5B]">
                       ${room.price}/night
                     </span>
-                    <button className="bg-[#8B4513] hover:bg-[#5B2415] text-white px-4 py-2 rounded-lg text-sm transition">
+                    <button
+                      className="bg-[#8B4513] hover:bg-[#5B2415] text-white px-4 py-2 rounded-lg text-sm transition"
+                      onClick={() => setBookingRoom(room)}
+                    >
                       Book Now
                     </button>
                   </div>
