@@ -27,9 +27,13 @@ const Navbar = () => {
     } finally {
       // Always clear session and update UI
       localStorage.removeItem("accessToken");
-      localStorage.removeItem(""); // Remove any token stored under an empty key
       localStorage.removeItem("user_id");
       localStorage.removeItem("user_name");
+      localStorage.removeItem("role");
+      localStorage.removeItem("refreshToken");
+      localStorage.removeItem("hotels");
+      localStorage.removeItem("Role");
+
       setIsLoggedIn(false);
       setLoading(false);
       window.location.href = "/"; // Redirect to home

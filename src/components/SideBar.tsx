@@ -6,6 +6,10 @@ import { RxDashboard } from "react-icons/rx";
 import { FiUsers } from "react-icons/fi";
 import { CgOrganisation } from "react-icons/cg";
 import { GrUserWorker } from "react-icons/gr";
+import { PiGearSix } from "react-icons/pi";
+import { LiaNetworkWiredSolid } from "react-icons/lia";
+
+
 
 export default function SideBar() {
   const [open, setOpen] = useState(true);
@@ -108,6 +112,36 @@ export default function SideBar() {
                 }`}
               >
                 Organizations
+              </span>
+            </li>
+          </Link>
+          <Link href="/service-types">
+            <li
+              className={`text-gray-700 text-base flex items-center gap-x-4 cursor-pointer p-2 hover:bg-gray-200 rounded-md `}
+            >
+              {" "}
+              <PiGearSix className="text-2xl block float-left mt-3" />
+              <span
+                className={`text-base font-medium mt-3  flex-1 duration-200 ${
+                  !open && "hidden"
+                }`}
+              >
+                Service Types
+              </span>
+            </li>
+          </Link>
+          <Link href="/services">
+            <li
+              className={`text-gray-700 text-base flex items-center gap-x-4 cursor-pointer p-2 hover:bg-gray-200 rounded-md `}
+            >
+              {" "}
+              <LiaNetworkWiredSolid className="text-2xl block float-left mt-3" />
+              <span
+                className={`text-base font-medium mt-3  flex-1 duration-200 ${
+                  !open && "hidden"
+                }`}
+              >
+                Services
               </span>
             </li>
           </Link>

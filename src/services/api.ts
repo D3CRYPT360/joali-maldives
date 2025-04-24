@@ -4,6 +4,111 @@ import { jwtDecode } from "jwt-decode";
 
 
 class JoaliApi {
+  // --- Services ---
+  /**
+   * Fetch all services or filtered services (e.g., rooms for a hotel) by passing filter params.
+   * @param filters Optional filters: { orgId, typeId, ... }
+   */
+  async getAllServices(filters?: { orgId?: number | string; typeId?: number | string; [key: string]: any }) {
+    let url = `${this.baseUrl}/api/Service/all`;
+    if (filters && Object.keys(filters).length > 0) {
+      const params = new URLSearchParams();
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== "") {
+          params.append(key, String(value));
+        }
+      });
+      url += `?${params.toString()}`;
+    }
+    const res = await this.fetchWithAuth(
+      url,
+      {
+        method: "GET",
+        headers: this.getAuthHeaders(),
+      }
+    );
+    let data = [];
+    const text = await res.text();
+    try {
+      data = text ? JSON.parse(text) : [];
+    } catch (e) {
+      data = [];
+    }
+    if (!Array.isArray(data)) data = [];
+    return data;
+  }
+
+  async createService(service: {
+    name: string;
+    description: string;
+    price: number;
+    orgId: number;
+    serviceTypeId: number;
+    imageUrl: string;
+    capacity?: number;
+    durationInMinutes?: number;
+  }) {
+    const res = await this.fetchWithAuth(
+      `${this.baseUrl}/api/Service/create`,
+      {
+        method: "POST",
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify(service),
+      }
+    );
+    let data = null;
+    const text = await res.text();
+    try {
+      data = text ? JSON.parse(text) : null;
+    } catch (e) {
+      data = null;
+    }
+    if (!res.ok)
+      throw new Error((data && data.message) || "Failed to create service");
+    return data;
+  }
+
+  // --- Service Types ---
+  async getAllServiceTypes() {
+    const res = await this.fetchWithAuth(
+      `${this.baseUrl}/api/Service/all-service-types`,
+      {
+        method: "GET",
+        headers: this.getAuthHeaders(),
+      }
+    );
+    let data = [];
+    const text = await res.text();
+    try {
+      data = text ? JSON.parse(text) : [];
+    } catch (e) {
+      data = [];
+    }
+    if (!Array.isArray(data)) data = [];
+    return data;
+  }
+
+  async createServiceType(serviceType: { name: string; description: string }) {
+    const res = await this.fetchWithAuth(
+      `${this.baseUrl}/api/Service/create-service-type`,
+      {
+        method: "POST",
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify(serviceType),
+      }
+    );
+    let data = null;
+    const text = await res.text();
+    try {
+      data = text ? JSON.parse(text) : null;
+    } catch (e) {
+      data = null;
+    }
+    if (!res.ok)
+      throw new Error((data && data.message) || "Failed to create service type");
+    return data;
+  }
+
   async refreshTokenIfNeeded(): Promise<boolean> {
     const accessToken = this.getAccessToken();
     const refreshToken = this.getRefreshToken();
@@ -316,6 +421,21 @@ class JoaliApi {
     const data = await res.json();
     if (!res.ok) {
       throw new Error(data.message || "Failed to create staff");
+    }
+    return data;
+  }
+
+  async toggleService(id: number) {
+    const res = await this.fetchWithAuth(
+      `${this.baseUrl}/api/Service/toggle/${id}`,
+      {
+        method: "POST",
+        headers: this.getAuthHeaders(),
+      }
+    );
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.message || "Failed to toggle service");
     }
     return data;
   }

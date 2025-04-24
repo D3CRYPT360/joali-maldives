@@ -121,7 +121,7 @@ export default function StaffsPage() {
                   placeholder="Search staffs..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:border-[#8B4513]"
+                  className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:border-[#8B4513] text-black"
                 />
               </div>
               <div className="flex items-center gap-4">
@@ -191,7 +191,7 @@ export default function StaffsPage() {
                       <input
                         id="staff-name"
                         type="text"
-                        className="w-full border px-3 py-2 rounded focus:outline-none focus:ring"
+                        className="w-full border px-3 py-2 rounded focus:outline-none focus:ring text-black"
                         value={form.name}
                         onChange={(e) =>
                           setForm({ ...form, name: e.target.value })
@@ -209,7 +209,7 @@ export default function StaffsPage() {
                       <input
                         id="staff-email"
                         type="email"
-                        className="w-full border px-3 py-2 rounded focus:outline-none focus:ring"
+                        className="w-full border px-3 py-2 rounded focus:outline-none focus:ring text-black"
                         value={form.email}
                         onChange={(e) =>
                           setForm({ ...form, email: e.target.value })
@@ -227,7 +227,7 @@ export default function StaffsPage() {
                       <input
                         id="staff-phone"
                         type="tel"
-                        className="w-full border px-3 py-2 rounded focus:outline-none focus:ring"
+                        className="w-full border px-3 py-2 rounded focus:outline-none focus:ring text-black"
                         value={form.phoneNumber}
                         onChange={(e) =>
                           setForm({ ...form, phoneNumber: e.target.value })
@@ -244,7 +244,7 @@ export default function StaffsPage() {
                       </label>
                       <select
                         id="staff-org"
-                        className="w-full border px-3 py-2 rounded focus:outline-none focus:ring"
+                        className="w-full border px-3 py-2 rounded focus:outline-none focus:ring text-black"
                         value={form.orgId}
                         onChange={(e) =>
                           setForm({ ...form, orgId: e.target.value })
@@ -364,7 +364,7 @@ export default function StaffsPage() {
                                     }}
                                     className="sr-only peer"
                                   />
-                                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer dark:bg-gray-700 peer-checked:bg-green-600 transition-all"></div>
+                                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer dark:bg-gray-700 peer-checked:bg-green-600 transition-all text-black"></div>
                                   <div className="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-all peer-checked:translate-x-full"></div>
                                 </label>
                               )}
