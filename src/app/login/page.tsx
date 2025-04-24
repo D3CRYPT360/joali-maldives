@@ -45,10 +45,12 @@ export default function login_page() {
       if (accessToken) {
         const decoded = jwtDecode(accessToken) as { [key: string]: any };
         const name = decoded["name"] || decoded.name || "User";
-        userId = decoded["userId"] || "";
+        const userId = decoded["userId"] || "";
+        const role = decoded["role"] || "";
         if (typeof window !== "undefined") {
           localStorage.setItem("user_name", name);
           localStorage.setItem("user_id", userId);
+          localStorage.setItem("role", role)
         }
       }
       if (userId) {

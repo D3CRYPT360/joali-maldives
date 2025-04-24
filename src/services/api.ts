@@ -1,5 +1,7 @@
 import { API_BASE, API_KEY } from "../types/types";
 import type { Organization, CustomerRegisterParams } from "../types/types";
+import { jwtDecode } from "jwt-decode";
+
 
 class JoaliApi {
   async refreshTokenIfNeeded(): Promise<boolean> {
@@ -18,10 +20,9 @@ class JoaliApi {
       data.token.accessToken &&
       data.token.refreshToken
     ) {
-      this.setToken(
+      this.setLocalStorage(
         data.token.accessToken,
-        data.token.refreshToken,
-        data.token.role
+        data.token.refreshToken
       );
       return true;
     }
@@ -50,14 +51,12 @@ class JoaliApi {
   apiKey: string;
   tokenKey: string;
   refreshKey: string;
-  roleKey: string;
 
   constructor(baseUrl: string, apiKey: string) {
     this.baseUrl = baseUrl;
     this.apiKey = apiKey;
     this.tokenKey = "accessToken";
     this.refreshKey = "refreshToken";
-    this.roleKey = "Role";
   }
 
   getAuthHeaders(): Record<string, string> {
@@ -67,11 +66,10 @@ class JoaliApi {
     };
   }
 
-  setLocalStorage(accessToken: string, refreshToken: string, Role: string) {
+  setLocalStorage(accessToken: string, refreshToken: string) {
     if (typeof window !== "undefined") {
       localStorage.setItem(this.tokenKey, accessToken);
       localStorage.setItem(this.refreshKey, refreshToken);
-      localStorage.setItem(this.roleKey, Role);
     }
   }
 
@@ -79,7 +77,6 @@ class JoaliApi {
     if (typeof window !== "undefined") {
       localStorage.removeItem(this.tokenKey);
       localStorage.removeItem(this.refreshKey);
-      localStorage.removeItem(this.roleKey);
     }
   }
 
@@ -111,10 +108,7 @@ class JoaliApi {
     }
     // Cache accessToken in localStorage
     if (data.token && data.token.accessToken) {
-      this.setAccessToken(data.token.accessToken);
-    }
-    if (data.token && data.token.refreshToken) {
-      this.setRefreshToken(data.token.refreshToken);
+      this.setLocalStorage(data.token.accessToken, data.token.refreshToken);
     }
 
     return data;
@@ -169,7 +163,7 @@ class JoaliApi {
       console.error("Logout error:", data);
       throw new Error(data.message || JSON.stringify(data) || "Logout failed");
     }
-    this.clearAccessToken();
+    this.clearTokens();
     return data;
   }
 
