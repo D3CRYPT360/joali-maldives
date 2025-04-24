@@ -31,6 +31,12 @@ const nextConfig = {
         hostname: 'media.licdn.com',
         port: '',
         pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.kumarakomlakeresort.in',
+        port: '',
+        pathname: '/**',
       }
     ],
   },
