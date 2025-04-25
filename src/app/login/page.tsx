@@ -47,10 +47,12 @@ export default function login_page() {
         const name = decoded["name"] || decoded.name || "User";
         const userId = decoded["userId"] || "";
         const role = decoded["role"] || "";
+        const hasBooking = decoded["hasBooking"] || false;
         if (typeof window !== "undefined") {
           localStorage.setItem("user_name", name);
           localStorage.setItem("user_id", userId);
-          localStorage.setItem("role", role)
+          localStorage.setItem("role", role);
+          localStorage.setItem("hasBooking", hasBooking.toString());
         }
       }
       if (userId) {

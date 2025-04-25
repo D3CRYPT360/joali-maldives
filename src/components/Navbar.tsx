@@ -33,6 +33,7 @@ const Navbar = () => {
       localStorage.removeItem("refreshToken");
       localStorage.removeItem("hotels");
       localStorage.removeItem("Role");
+      localStorage.removeItem("hasBooking");
 
       setIsLoggedIn(false);
       setLoading(false);

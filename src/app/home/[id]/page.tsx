@@ -62,6 +62,17 @@ export default function UserHomePage() {
                     <div>Quantity: {order.quantity}</div>
                     <div>Scheduled For: {order.scheduledFor ? new Date(order.scheduledFor).toLocaleString() : "-"}</div>
                     <div>Status: {['Pending','Confirmed','Cancelled','Completed'][order.status] || 'Unknown'}</div>
+                    {order.status === 0 && (
+                      <button
+                        className="mt-2 px-4 py-2 bg-gradient-to-r from-[#8B4513] to-[#d9a066] text-white rounded-lg font-semibold shadow hover:from-[#5B2415] hover:to-[#b97c2a] transition"
+                        onClick={() => {
+                          const hotelId = order.service?.hotelId || order.service?.orgId || '';
+                          window.location.href = `/hotels/${hotelId}/rooms/payment?bookingId=${order.id}`;
+                        }}
+                      >
+                        Pay Now
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>

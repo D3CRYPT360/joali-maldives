@@ -2,14 +2,34 @@ import { API_BASE, API_KEY } from "../types/types";
 import type { Organization, CustomerRegisterParams } from "../types/types";
 import { jwtDecode } from "jwt-decode";
 
-
 class JoaliApi {
+  /**
+   * Pay for a booking
+   * @param bookingId The booking/order id to pay for
+   */
+  async payForBooking(bookingId: number | string) {
+    const res = await this.fetchWithAuth(`${this.baseUrl}/api/service/pay`, {
+      method: "POST",
+      headers: this.getAuthHeaders(),
+      body: String(bookingId),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.message || "Payment failed");
+    }
+    return data;
+  }
+
   // --- Services ---
   /**
    * Fetch all services or filtered services (e.g., rooms for a hotel) by passing filter params.
    * @param filters Optional filters: { orgId, typeId, ... }
    */
-  async getAllServices(filters?: { orgId?: number | string; typeId?: number | string; [key: string]: any }) {
+  async getAllServices(filters?: {
+    orgId?: number | string;
+    typeId?: number | string;
+    [key: string]: any;
+  }) {
     let url = `${this.baseUrl}/api/Service/all`;
     if (filters && Object.keys(filters).length > 0) {
       const params = new URLSearchParams();
@@ -20,13 +40,10 @@ class JoaliApi {
       });
       url += `?${params.toString()}`;
     }
-    const res = await this.fetchWithAuth(
-      url,
-      {
-        method: "GET",
-        headers: this.getAuthHeaders(),
-      }
-    );
+    const res = await this.fetchWithAuth(url, {
+      method: "GET",
+      headers: this.getAuthHeaders(),
+    });
     let data = [];
     const text = await res.text();
     try {
@@ -48,14 +65,11 @@ class JoaliApi {
     capacity?: number;
     durationInMinutes?: number;
   }) {
-    const res = await this.fetchWithAuth(
-      `${this.baseUrl}/api/Service/create`,
-      {
-        method: "POST",
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify(service),
-      }
-    );
+    const res = await this.fetchWithAuth(`${this.baseUrl}/api/Service/create`, {
+      method: "POST",
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify(service),
+    });
     let data = null;
     const text = await res.text();
     try {
@@ -105,7 +119,9 @@ class JoaliApi {
       data = null;
     }
     if (!res.ok)
-      throw new Error((data && data.message) || "Failed to create service type");
+      throw new Error(
+        (data && data.message) || "Failed to create service type"
+      );
     return data;
   }
 
@@ -125,10 +141,7 @@ class JoaliApi {
       data.token.accessToken &&
       data.token.refreshToken
     ) {
-      this.setLocalStorage(
-        data.token.accessToken,
-        data.token.refreshToken
-      );
+      this.setLocalStorage(data.token.accessToken, data.token.refreshToken);
       return true;
     }
     this.clearTokens();
@@ -446,7 +459,16 @@ class JoaliApi {
    * Place a new service order
    * @param order { serviceId: number, quantity: number, scheduledFor: string }
    */
-  async placeServiceOrder(order: { serviceId: number; quantity: number; scheduledFor: string }) {
+  /**
+   * Places a new service order and returns the booking ID.
+   * @param order { serviceId: number, quantity: number, scheduledFor: string }
+   * @returns bookingId (number) if successful
+   */
+  async placeServiceOrder(order: {
+    serviceId: number;
+    quantity: number;
+    scheduledFor: string;
+  }): Promise<number> {
     const res = await this.fetchWithAuth(
       `${this.baseUrl}/api/ServiceOrder/place`,
       {
@@ -459,7 +481,17 @@ class JoaliApi {
     if (!res.ok) {
       throw new Error(data.message || "Failed to place order");
     }
-    return data;
+    // bookingId is data.data.id
+    return data?.data?.id;
+  }
+
+  /**
+   * Extracts the bookingId from a placeServiceOrder API response object.
+   * @param response API response object
+   * @returns bookingId (number) or undefined
+   */
+  getBookingIdFromOrderResponse(response: any): number | undefined {
+    return response?.data?.id;
   }
 
   /**
@@ -484,13 +516,22 @@ class JoaliApi {
    * Get all service orders (admin/org)
    * @param params Optional: { orgId?: number, status?: number, from?: string, to?: string }
    */
-  async getAllServiceOrders(params?: { orgId?: number; status?: number; from?: string; to?: string }) {
+  async getAllServiceOrders(params?: {
+    orgId?: number;
+    status?: number;
+    from?: string;
+    to?: string;
+  }) {
     const query = params
-      ? '?' + Object.entries(params)
+      ? "?" +
+        Object.entries(params)
           .filter(([_, v]) => v !== undefined && v !== null && v !== "")
-          .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v as string)}`)
-          .join('&')
-      : '';
+          .map(
+            ([k, v]) =>
+              `${encodeURIComponent(k)}=${encodeURIComponent(v as string)}`
+          )
+          .join("&")
+      : "";
     const res = await this.fetchWithAuth(
       `${this.baseUrl}/api/ServiceOrder/all${query}`,
       {
