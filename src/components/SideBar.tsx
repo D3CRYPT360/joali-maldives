@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { BsArrowLeftShort } from "react-icons/bs";
 import { MdHome } from "react-icons/md";
@@ -13,6 +13,18 @@ import { LiaNetworkWiredSolid } from "react-icons/lia";
 
 export default function SideBar() {
   const [open, setOpen] = useState(true);
+  const [role, setRole] = useState<string | null>(null);
+  const [orgId, setOrgId] = useState<string | null>(null);
+  const [user_name, setUser_name] = useState<string | null>(null);
+
+  // Fetch role from localStorage on mount (client-side only)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setRole(localStorage.getItem('role'));
+      setOrgId(localStorage.getItem('OrgId'));
+      setUser_name(localStorage.getItem('user_name'));
+    }
+  }, []);
 
   return (
     <div className="flex">
@@ -54,6 +66,7 @@ export default function SideBar() {
         </div>
 
         <ul className="pt-10">
+          {/* Dashboard is handled elsewhere for role, so always show here */}
           <Link href="/dashboard">
             <li
               className={`text-gray-700 text-base flex items-center gap-x-4 cursor-pointer p-2 hover:bg-gray-200 rounded-md `}
@@ -70,71 +83,85 @@ export default function SideBar() {
             </li>
           </Link>
 
-          <Link href="/users">
-            <li
-              className={`text-gray-700 text-base flex items-center gap-x-4 cursor-pointer p-2 hover:bg-gray-200 rounded-md `}
-            >
-              {" "}
-              <FiUsers className="text-2xl block float-left mt-3" />
-              <span
-                className={`text-base font-medium mt-3  flex-1 duration-200 ${
-                  !open && "hidden"
-                }`}
+          {/* Hide Users for Staff and Customer, but always show for Admin */}
+          {(user_name === 'Admin' || (role !== 'Staff' && role !== 'Customer')) && (
+            <Link href="/users">
+              <li
+                className={`text-gray-700 text-base flex items-center gap-x-4 cursor-pointer p-2 hover:bg-gray-200 rounded-md `}
               >
-                Users
-              </span>
-            </li>
-          </Link>
-          <Link href="/staffs">
-            <li
-              className={`text-gray-700 text-base flex items-center gap-x-4 cursor-pointer p-2 hover:bg-gray-200 rounded-md `}
-            >
-              {" "}
-              <GrUserWorker className="text-2xl block float-left mt-3" />
-              <span
-                className={`text-base font-medium mt-3  flex-1 duration-200 ${
-                  !open && "hidden"
-                }`}
+                {" "}
+                <FiUsers className="text-2xl block float-left mt-3" />
+                <span
+                  className={`text-base font-medium mt-3  flex-1 duration-200 ${
+                    !open && "hidden"
+                  }`}
+                >
+                  Users
+                </span>
+              </li>
+            </Link>
+          )}
+          {/* Hide Staffs for Staff and Customer, but always show for Admin */}
+          {(user_name === 'Admin' || (role !== 'Staff' && role !== 'Customer')) && (
+            <Link href="/staffs">
+              <li
+                className={`text-gray-700 text-base flex items-center gap-x-4 cursor-pointer p-2 hover:bg-gray-200 rounded-md `}
               >
-                Staffs
-              </span>
-            </li>
-          </Link>
-          <Link href="/organizations">
-            <li
-              className={`text-gray-700 text-base flex items-center gap-x-4 cursor-pointer p-2 hover:bg-gray-200 rounded-md `}
-            >
-              {" "}
-              <CgOrganisation className="text-2xl block float-left mt-3" />
-              <span
-                className={`text-base font-medium mt-3  flex-1 duration-200 ${
-                  !open && "hidden"
-                }`}
+                {" "}
+                <GrUserWorker className="text-2xl block float-left mt-3" />
+                <span
+                  className={`text-base font-medium mt-3  flex-1 duration-200 ${
+                    !open && "hidden"
+                  }`}
+                >
+                  Staffs
+                </span>
+              </li>
+            </Link>
+          )}
+          {/* Hide Organizations for Staff and Customer, but always show for Admin */}
+          {(user_name === 'Admin' || (role !== 'Staff' && role !== 'Customer')) && (
+            <Link href="/organizations">
+              <li
+                className={`text-gray-700 text-base flex items-center gap-x-4 cursor-pointer p-2 hover:bg-gray-200 rounded-md `}
               >
-                Organizations
-              </span>
-            </li>
-          </Link>
-          <Link href="/service-types">
-            <li
-              className={`text-gray-700 text-base flex items-center gap-x-4 cursor-pointer p-2 hover:bg-gray-200 rounded-md `}
-            >
-              {" "}
-              <PiGearSix className="text-2xl block float-left mt-3" />
-              <span
-                className={`text-base font-medium mt-3  flex-1 duration-200 ${
-                  !open && "hidden"
-                }`}
+                {" "}
+                <CgOrganisation className="text-2xl block float-left mt-3" />
+                <span
+                  className={`text-base font-medium mt-3  flex-1 duration-200 ${
+                    !open && "hidden"
+                  }`}
+                >
+                  Organizations
+                </span>
+              </li>
+            </Link>
+          )}
+          {/* Hide Service Types for Staff and Customer, but always show for Admin */}
+          {(user_name === 'Admin' || (role !== 'Staff' && role !== 'Customer')) && (
+            <Link href="/service-types">
+              <li
+                className={`text-gray-700 text-base flex items-center gap-x-4 cursor-pointer p-2 hover:bg-gray-200 rounded-md `}
               >
-                Service Types
-              </span>
-            </li>
-          </Link>
-          <Link href="/services">
-            <li
-              className={`text-gray-700 text-base flex items-center gap-x-4 cursor-pointer p-2 hover:bg-gray-200 rounded-md `}
-            >
-              {" "}
+                {" "}
+                <PiGearSix className="text-2xl block float-left mt-3" />
+                <span
+                  className={`text-base font-medium mt-3  flex-1 duration-200 ${
+                    !open && "hidden"
+                  }`}
+                >
+                  Service Types
+                </span>
+              </li>
+            </Link>
+          )}
+          {/* Hide Services for Staff and Customer, but always show for Admin */}
+          {(user_name === 'Admin' || (role !== 'Customer')) && (
+            <Link href="/services">
+              <li
+                className={`text-gray-700 text-base flex items-center gap-x-4 cursor-pointer p-2 hover:bg-gray-200 rounded-md `}
+              >
+                {" "}
               <LiaNetworkWiredSolid className="text-2xl block float-left mt-3" />
               <span
                 className={`text-base font-medium mt-3  flex-1 duration-200 ${
@@ -145,6 +172,7 @@ export default function SideBar() {
               </span>
             </li>
           </Link>
+          )}
         </ul>
       </section>
       {/* Sidebar section end*/}

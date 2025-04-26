@@ -39,7 +39,8 @@ export default function OrganizationsPage() {
     if (typeof window !== 'undefined') {
       const role = localStorage.getItem('role');
       const userId = localStorage.getItem('user_id');
-      if (role === 'Customer' && userId) {
+      const user_name = localStorage.getItem('user_name');
+      if ((role === 'Customer' || role === 'Staff') && userId && user_name !== 'Admin') {
         router.replace(`/home/${userId}`);
       }
     }

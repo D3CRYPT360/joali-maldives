@@ -11,7 +11,7 @@ export default function Dashboard() {
     if (typeof window !== 'undefined') {
       const role = localStorage.getItem('role');
       const userId = localStorage.getItem('user_id');
-      if (role === 'Customer' && userId) {
+      if ((role === 'Customer') && userId) {
         router.replace(`/home/${userId}`);
       }
     }

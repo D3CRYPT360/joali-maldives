@@ -19,11 +19,13 @@ export default function ServiceTypesPage() {
     if (typeof window !== 'undefined') {
       const role = localStorage.getItem('role');
       const userId = localStorage.getItem('user_id');
-      if (role === 'Customer' && userId) {
+      const user_name = localStorage.getItem('user_name');
+      if ((role === 'Customer' || role === 'Staff') && userId && user_name !== 'Admin') {
         router.replace(`/home/${userId}`);
       }
     }
   }, [router]);
+
   const [serviceTypes, setServiceTypes] = useState<ServiceType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");

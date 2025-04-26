@@ -4,8 +4,8 @@ import React from "react";
 import SideBar from "@/components/SideBar";
 
 import { useEffect } from "react";
-import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { api } from "../../services/api";
 
 type User = {
@@ -28,7 +28,8 @@ export default function UsersPage() {
     if (typeof window !== 'undefined') {
       const role = localStorage.getItem('role');
       const userId = localStorage.getItem('user_id');
-      if (role === 'Customer' && userId) {
+      const user_name = localStorage.getItem('user_name');
+      if ((role === 'Customer' || role === 'Staff') && userId && user_name !== 'Admin') {
         router.replace(`/home/${userId}`);
       }
     }

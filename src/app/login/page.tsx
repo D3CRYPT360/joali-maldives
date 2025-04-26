@@ -48,11 +48,13 @@ export default function login_page() {
         const userId = decoded["userId"] || "";
         const role = decoded["role"] || "";
         const hasBooking = decoded["hasBooking"] || false;
+        const orgId = decoded["OrgId"] || "";
         if (typeof window !== "undefined") {
           localStorage.setItem("user_name", name);
           localStorage.setItem("user_id", userId);
           localStorage.setItem("role", role);
           localStorage.setItem("hasBooking", hasBooking.toString());
+          localStorage.setItem("OrgId", orgId);
         }
       }
       if (userId) {

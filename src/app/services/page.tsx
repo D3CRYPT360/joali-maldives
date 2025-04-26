@@ -48,15 +48,25 @@ export default function ServicesPage() {
   const [serviceTypeOptions, setServiceTypeOptions] = useState<ServiceTypeOption[]>([]);
 
   useEffect(() => {
-    fetchAll();
+    if (typeof window !== 'undefined') {
+      const role = localStorage.getItem('role');
+      const orgId = localStorage.getItem('OrgId');
+      if (role === 'Staff' && orgId) {
+        fetchAll(Number(orgId));
+      } else {
+        fetchAll();
+      }
+    } else {
+      fetchAll();
+    }
   }, []);
 
-  async function fetchAll() {
+  async function fetchAll(staffOrgId?: number) {
     setLoading(true);
     setError("");
     try {
       const [servicesRes, orgsRes, typesRes] = await Promise.all([
-        api.getAllServices(),
+        staffOrgId ? api.getAllServices({ orgId: staffOrgId }) : api.getAllServices(),
         api.getAllOrganizations(),
         api.getAllServiceTypes(),
       ]);
@@ -70,7 +80,16 @@ export default function ServicesPage() {
     }
   }
 
-  const filteredServices = services.filter((svc) => {
+  // Further restrict services for Staff to their own org
+  let filteredServices = services;
+  if (typeof window !== 'undefined') {
+    const role = localStorage.getItem('role');
+    const orgId = localStorage.getItem('OrgId');
+    if (role === 'Staff' && orgId) {
+      filteredServices = services.filter((svc) => String(svc.orgId) === orgId);
+    }
+  }
+  filteredServices = filteredServices.filter((svc) => {
     const searchLower = search.toLowerCase();
     return (
       svc.name.toLowerCase().includes(searchLower) ||
@@ -106,6 +125,22 @@ export default function ServicesPage() {
       setFormLoading(false);
     }
   };
+
+  // Determine filtered org options for the modal
+  const [filteredOrgOptions, setFilteredOrgOptions] = useState<OrgOption[]>([]);
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const role = localStorage.getItem('role');
+      const orgId = localStorage.getItem('OrgId');
+      if (role === 'Staff' && orgId) {
+        setFilteredOrgOptions(orgOptions.filter((o) => String(o.id) === orgId));
+      } else {
+        setFilteredOrgOptions(orgOptions);
+      }
+    } else {
+      setFilteredOrgOptions(orgOptions);
+    }
+  }, [orgOptions]);
 
   return (
     <>
@@ -222,7 +257,7 @@ export default function ServicesPage() {
         success={""}
         form={form}
         onFormChange={handleFormChange}
-        orgOptions={orgOptions}
+        orgOptions={filteredOrgOptions}
         serviceTypeOptions={serviceTypeOptions}
       />
   </div>
