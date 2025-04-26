@@ -8,10 +8,10 @@ import { useRouter } from "next/navigation";
 export default function Dashboard() {
   const router = useRouter();
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const role = localStorage.getItem('role');
-      const userId = localStorage.getItem('user_id');
-      if ((role === 'Customer') && userId) {
+    if (typeof window !== "undefined") {
+      const role = localStorage.getItem("role");
+      const userId = localStorage.getItem("user_id");
+      if (role === "Customer" && userId) {
         router.replace(`/home/${userId}`);
       }
     }
@@ -21,6 +21,11 @@ export default function Dashboard() {
   return (
     <div className="relative w-full min-h-screen bg-gray-50">
       <SideBar />
+      <div className="flex-1">
+        <div className="p-4">
+          <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
+        </div>
+      </div>
     </div>
   );
 }

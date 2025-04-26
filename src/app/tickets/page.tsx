@@ -37,7 +37,7 @@ export default function TicketsPage() {
           </div>
 
           {/* Themepark Events Card */}
-          <div className="bg-white rounded-2xl shadow-xl flex flex-col items-center p-8 w-full md:w-80 opacity-80">
+          <div className="bg-white rounded-2xl shadow-xl flex flex-col items-center p-8 w-full md:w-80 transition-transform hover:scale-105">
             <div className="mb-4 text-5xl text-orange-400">
               <span role="img" aria-label="themepark">
                 🎢
@@ -50,10 +50,10 @@ export default function TicketsPage() {
               Enjoy thrilling rides and unforgettable entertainment.
             </p>
             <button
-              className="bg-orange-200 text-white font-semibold py-2 px-6 rounded-lg cursor-not-allowed shadow-md"
-              disabled
+              className="bg-orange-300 hover:bg-orange-400 text-white font-semibold py-2 px-6 rounded-lg transition-colors shadow-md"
+              onClick={() => router.push("/tickets/themepark")}
             >
-              Coming Soon
+              Purchase Tickets
             </button>
           </div>
 

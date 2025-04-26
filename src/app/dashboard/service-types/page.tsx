@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import SideBar from "@/components/SideBar";
 import { useRouter } from "next/navigation";
-import { api } from "../../services/api";
+import { api } from "@/services/api";
 
 type ServiceType = {
   id: number;
@@ -11,16 +11,18 @@ type ServiceType = {
   description: string;
 };
 
-
-
 export default function ServiceTypesPage() {
   const router = useRouter();
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const role = localStorage.getItem('role');
-      const userId = localStorage.getItem('user_id');
-      const user_name = localStorage.getItem('user_name');
-      if ((role === 'Customer' || role === 'Staff') && userId && user_name !== 'Admin') {
+    if (typeof window !== "undefined") {
+      const role = localStorage.getItem("role");
+      const userId = localStorage.getItem("user_id");
+      const user_name = localStorage.getItem("user_name");
+      if (
+        (role === "Customer" || role === "Staff") &&
+        userId &&
+        user_name !== "Admin"
+      ) {
         router.replace(`/home/${userId}`);
       }
     }
@@ -68,7 +70,9 @@ export default function ServiceTypesPage() {
   });
 
   // Handle form changes
-  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleFormChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
@@ -78,7 +82,10 @@ export default function ServiceTypesPage() {
     setFormError("");
     setFormLoading(true);
     try {
-      await api.createServiceType({ name: form.name, description: form.description });
+      await api.createServiceType({
+        name: form.name,
+        description: form.description,
+      });
       setShowModal(false);
       setForm({ name: "", description: "" });
       fetchServiceTypes();
@@ -94,7 +101,9 @@ export default function ServiceTypesPage() {
       <div className="flex">
         <SideBar />
         <div className="flex-1 p-8">
-          <h1 className="text-2xl font-bold text-[#8B4513] mb-6">Service Types</h1>
+          <h1 className="text-2xl font-bold text-[#8B4513] mb-6">
+            Service Types
+          </h1>
           <div className="bg-white rounded-lg p-6 shadow-sm">
             <div className="flex justify-between items-center mb-6">
               <div className="flex-1 max-w-xl">
@@ -124,17 +133,29 @@ export default function ServiceTypesPage() {
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        ID
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Name
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Description
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200 text-black">
                     {filteredServiceTypes.map((type) => (
                       <tr key={type.id}>
-                        <td className="px-6 py-4 whitespace-nowrap">{type.id}</td>
-                        <td className="px-6 py-4 whitespace-nowrap">{type.name}</td>
-                        <td className="px-6 py-4 whitespace-nowrap">{type.description}</td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {type.id}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {type.name}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {type.description}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -154,7 +175,9 @@ export default function ServiceTypesPage() {
             >
               &times;
             </button>
-            <h2 className="text-xl font-bold mb-4 text-[#8B4513]">Add Service Type</h2>
+            <h2 className="text-xl font-bold mb-4 text-[#8B4513]">
+              Add Service Type
+            </h2>
             <form onSubmit={handleFormSubmit} className="space-y-4">
               <div>
                 <label className="block text-gray-700 mb-1">Name</label>
@@ -177,7 +200,9 @@ export default function ServiceTypesPage() {
                   required
                 />
               </div>
-              {formError && <div className="text-red-500 text-sm">{formError}</div>}
+              {formError && (
+                <div className="text-red-500 text-sm">{formError}</div>
+              )}
               <button
                 type="submit"
                 className="bg-[#8B4513] text-white px-6 py-2 rounded-lg font-semibold hover:bg-[#A0522D] transition w-full disabled:opacity-50"

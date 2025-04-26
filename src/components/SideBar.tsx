@@ -9,8 +9,6 @@ import { GrUserWorker } from "react-icons/gr";
 import { PiGearSix } from "react-icons/pi";
 import { LiaNetworkWiredSolid } from "react-icons/lia";
 
-
-
 export default function SideBar() {
   const [open, setOpen] = useState(true);
   const [role, setRole] = useState<string | null>(null);
@@ -19,10 +17,10 @@ export default function SideBar() {
 
   // Fetch role from localStorage on mount (client-side only)
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setRole(localStorage.getItem('role'));
-      setOrgId(localStorage.getItem('OrgId'));
-      setUser_name(localStorage.getItem('user_name'));
+    if (typeof window !== "undefined") {
+      setRole(localStorage.getItem("role"));
+      setOrgId(localStorage.getItem("OrgId"));
+      setUser_name(localStorage.getItem("user_name"));
     }
   }, []);
 
@@ -66,26 +64,10 @@ export default function SideBar() {
         </div>
 
         <ul className="pt-10">
-          {/* Dashboard is handled elsewhere for role, so always show here */}
-          <Link href="/dashboard">
-            <li
-              className={`text-gray-700 text-base flex items-center gap-x-4 cursor-pointer p-2 hover:bg-gray-200 rounded-md `}
-            >
-              {" "}
-              <RxDashboard className="text-2xl block float-left mt-2" />
-              <span
-                className={`text-base font-medium mt-2  flex-1 duration-200 ${
-                  !open && "hidden"
-                }`}
-              >
-                Dashboard
-              </span>
-            </li>
-          </Link>
-
           {/* Hide Users for Staff and Customer, but always show for Admin */}
-          {(user_name === 'Admin' || (role !== 'Staff' && role !== 'Customer')) && (
-            <Link href="/users">
+          {(user_name === "Admin" ||
+            (role !== "Staff" && role !== "Customer")) && (
+            <Link href="/dashboard/users">
               <li
                 className={`text-gray-700 text-base flex items-center gap-x-4 cursor-pointer p-2 hover:bg-gray-200 rounded-md `}
               >
@@ -102,8 +84,9 @@ export default function SideBar() {
             </Link>
           )}
           {/* Hide Staffs for Staff and Customer, but always show for Admin */}
-          {(user_name === 'Admin' || (role !== 'Staff' && role !== 'Customer')) && (
-            <Link href="/staffs">
+          {(user_name === "Admin" ||
+            (role !== "Staff" && role !== "Customer")) && (
+            <Link href="/dashboard/staffs">
               <li
                 className={`text-gray-700 text-base flex items-center gap-x-4 cursor-pointer p-2 hover:bg-gray-200 rounded-md `}
               >
@@ -120,8 +103,9 @@ export default function SideBar() {
             </Link>
           )}
           {/* Hide Organizations for Staff and Customer, but always show for Admin */}
-          {(user_name === 'Admin' || (role !== 'Staff' && role !== 'Customer')) && (
-            <Link href="/organizations">
+          {(user_name === "Admin" ||
+            (role !== "Staff" && role !== "Customer")) && (
+            <Link href="/dashboard/organizations">
               <li
                 className={`text-gray-700 text-base flex items-center gap-x-4 cursor-pointer p-2 hover:bg-gray-200 rounded-md `}
               >
@@ -138,8 +122,9 @@ export default function SideBar() {
             </Link>
           )}
           {/* Hide Service Types for Staff and Customer, but always show for Admin */}
-          {(user_name === 'Admin' || (role !== 'Staff' && role !== 'Customer')) && (
-            <Link href="/service-types">
+          {(user_name === "Admin" ||
+            (role !== "Staff" && role !== "Customer")) && (
+            <Link href="/dashboard/service-types">
               <li
                 className={`text-gray-700 text-base flex items-center gap-x-4 cursor-pointer p-2 hover:bg-gray-200 rounded-md `}
               >
@@ -156,22 +141,22 @@ export default function SideBar() {
             </Link>
           )}
           {/* Hide Services for Staff and Customer, but always show for Admin */}
-          {(user_name === 'Admin' || (role !== 'Customer')) && (
-            <Link href="/services">
+          {(user_name === "Admin" || role !== "Customer") && (
+            <Link href="/dashboard/services">
               <li
                 className={`text-gray-700 text-base flex items-center gap-x-4 cursor-pointer p-2 hover:bg-gray-200 rounded-md `}
               >
                 {" "}
-              <LiaNetworkWiredSolid className="text-2xl block float-left mt-3" />
-              <span
-                className={`text-base font-medium mt-3  flex-1 duration-200 ${
-                  !open && "hidden"
-                }`}
-              >
-                Services
-              </span>
-            </li>
-          </Link>
+                <LiaNetworkWiredSolid className="text-2xl block float-left mt-3" />
+                <span
+                  className={`text-base font-medium mt-3  flex-1 duration-200 ${
+                    !open && "hidden"
+                  }`}
+                >
+                  Services
+                </span>
+              </li>
+            </Link>
           )}
         </ul>
       </section>

@@ -65,16 +65,14 @@ const Navbar = () => {
           <a href="/about" className="hover:text-opacity-80">
             About
           </a>
-          {typeof window !== 'undefined' && localStorage.getItem('role') !== 'Customer' && (
-            <Link href="/dashboard" className="hover:text-opacity-80">
-              Dashboard
-            </Link>
-          )}
+          {typeof window !== "undefined" &&
+            localStorage.getItem("role") !== "Customer" && (
+              <Link href="/dashboard" className="hover:text-opacity-80">
+                Dashboard
+              </Link>
+            )}
           <Link href="/tickets" className="hover:text-opacity-80">
-            Tickets
-          </Link>
-          <Link href="/themepark" className="hover:text-opacity-80">
-            Theme Park
+            Ferry & Activities
           </Link>
         </div>
         {isLoggedIn ? (
@@ -90,14 +88,17 @@ const Navbar = () => {
               className="focus:outline-none"
               title="Go to your home page"
               onClick={() => {
-                const userId = typeof window !== 'undefined' ? localStorage.getItem('user_id') : null;
+                const userId =
+                  typeof window !== "undefined"
+                    ? localStorage.getItem("user_id")
+                    : null;
                 if (userId) {
                   window.location.href = `/home/${userId}`;
                 }
               }}
             >
               <img
-                src='/images/default-avatar.jpg'
+                src="/images/default-avatar.jpg"
                 alt="User Avatar"
                 className="w-10 h-10 rounded-full border-2 border-[#8B4513] shadow-sm object-cover"
               />

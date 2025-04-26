@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import SideBar from "@/components/SideBar";
 import CreateOrganizationModal from "@/components/CreateOrganizationModal";
-import { api } from "../../services/api";
+import { api } from "@/services/api";
 
 const orgTypes = [
   { value: 0, label: "Other" },
@@ -36,11 +36,15 @@ type Organization = {
 export default function OrganizationsPage() {
   const router = useRouter();
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const role = localStorage.getItem('role');
-      const userId = localStorage.getItem('user_id');
-      const user_name = localStorage.getItem('user_name');
-      if ((role === 'Customer' || role === 'Staff') && userId && user_name !== 'Admin') {
+    if (typeof window !== "undefined") {
+      const role = localStorage.getItem("role");
+      const userId = localStorage.getItem("user_id");
+      const user_name = localStorage.getItem("user_name");
+      if (
+        (role === "Customer" || role === "Staff") &&
+        userId &&
+        user_name !== "Admin"
+      ) {
         router.replace(`/home/${userId}`);
       }
     }
@@ -74,7 +78,6 @@ export default function OrganizationsPage() {
         const data = await api.getAllOrganizations();
         // Normalize: always use orgType in frontend
         setOrgs(data.map((org: any) => ({ ...org, orgType: org.type })));
-
       } catch (err: any) {
         setError(err.message || "Failed to fetch organizations");
       } finally {
@@ -107,7 +110,6 @@ export default function OrganizationsPage() {
       setShowModal(false);
       const orgData = await api.getAllOrganizations();
       setOrgs(orgData.map((org: any) => ({ ...org, orgType: org.type })));
-
     } catch (err: any) {
       setFormError(err.message || "Failed to create organization");
     } finally {
@@ -261,4 +263,3 @@ export default function OrganizationsPage() {
     </div>
   );
 }
-

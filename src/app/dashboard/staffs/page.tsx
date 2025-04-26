@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import SideBar from "@/components/SideBar";
-import { api } from "../../services/api";
+import { api } from "@/services/api";
 
 type Staff = {
   id: number;
@@ -19,11 +19,15 @@ type Staff = {
 export default function StaffsPage() {
   const router = useRouter();
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const role = localStorage.getItem('role');
-      const userId = localStorage.getItem('user_id');
-      const user_name = localStorage.getItem('user_name');
-      if ((role === 'Customer' || role === 'Staff') && userId && user_name !== 'Admin') {
+    if (typeof window !== "undefined") {
+      const role = localStorage.getItem("role");
+      const userId = localStorage.getItem("user_id");
+      const user_name = localStorage.getItem("user_name");
+      if (
+        (role === "Customer" || role === "Staff") &&
+        userId &&
+        user_name !== "Admin"
+      ) {
         router.replace(`/home/${userId}`);
       }
     }
