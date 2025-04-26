@@ -29,7 +29,7 @@ type Organization = {
   updatedAt?: string | null;
   parentOrganizationId?: number | null;
   parentOrganization?: any | null;
-  type: number;
+  orgType: number;
 };
 
 const Organizations = () => {
@@ -46,7 +46,7 @@ const Organizations = () => {
     country: "",
     website: "",
     logoUrl: "",
-    type: 0,
+    orgType: 1,
   };
   const [form, setForm] = useState(initialFormState);
   const [formLoading, setFormLoading] = useState(false);
@@ -59,7 +59,9 @@ const Organizations = () => {
       setError("");
       try {
         const data = await api.getAllOrganizations();
-        setOrgs(data);
+        // Normalize: always use orgType in frontend
+        setOrgs(data.map((org: any) => ({ ...org, orgType: org.type })));
+
       } catch (err: any) {
         setError(err.message || "Failed to fetch organizations");
       } finally {
@@ -75,7 +77,7 @@ const Organizations = () => {
     const { name, value } = e.target;
     setForm((prev) => ({
       ...prev,
-      [name]: name === "type" ? Number(value) : value,
+      [name]: name === "orgType" ? Number(value) : value,
     }));
   };
 
@@ -84,14 +86,15 @@ const Organizations = () => {
     setFormError("");
     setFormSuccess("");
     try {
-      // Ensure type is always a number
-      const cleanFormData = { ...formData, type: Number(formData.type) };
+      // Ensure orgType is always a number
+      const cleanFormData = { ...formData, orgType: Number(formData.orgType) };
       await api.createOrganization(cleanFormData);
       setFormSuccess("Organization created successfully!");
       setForm(initialFormState);
       setShowModal(false);
       const orgData = await api.getAllOrganizations();
-      setOrgs(orgData);
+      setOrgs(orgData.map((org: any) => ({ ...org, orgType: org.type })));
+
     } catch (err: any) {
       setFormError(err.message || "Failed to create organization");
     } finally {
@@ -165,7 +168,7 @@ const Organizations = () => {
                           {org.name}
                         </td>
                         <td className="py-4 text-black">
-                          {orgTypes.find((t) => t.value === Number(org.type))
+                          {orgTypes.find((t) => t.value === Number(org.orgType))
                             ?.label || "Other"}
                         </td>
                         <td className="py-4 text-black">{org.email}</td>
@@ -227,7 +230,7 @@ const Organizations = () => {
             loading={formLoading}
             error={formError}
             success={formSuccess}
-            form={{ ...form, type: Number(form.type) }}
+            form={{ ...form }}
             onFormChange={handleFormChange}
           />
         </div>

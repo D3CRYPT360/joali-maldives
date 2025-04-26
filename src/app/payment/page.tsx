@@ -17,6 +17,22 @@ export default function PaymentPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
+  // Booking/order details
+  const [order, setOrder] = useState<any | null>(null);
+  const [orderLoading, setOrderLoading] = useState(true);
+
+  React.useEffect(() => {
+    if (!bookingId) return;
+    setOrderLoading(true);
+    api.getMyServiceOrders()
+      .then((orders: any[]) => {
+        const found = orders.find((o: any) => String(o.id) === String(bookingId));
+        setOrder(found || null);
+        setOrderLoading(false);
+      })
+      .catch(() => setOrderLoading(false));
+  }, [bookingId]);
+
   const handlePay = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -59,7 +75,15 @@ export default function PaymentPage() {
             {/* Add more booking details here if available */}
             <div className="flex justify-between text-[#8B4513] text-lg">
               <span>Amount Due</span>
-              <span className="font-bold text-2xl">$XXX</span>
+              <span className="font-bold text-2xl">
+                {orderLoading ? (
+                  <span className="animate-pulse text-[#c2a46a]">Loading...</span>
+                ) : order && order.service ? (
+                  <>${order.quantity * order.service.price}</>
+                ) : (
+                  "$0"
+                )}
+              </span>
             </div>
           </div>
         </div>

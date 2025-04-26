@@ -20,8 +20,8 @@ const orgTypes = [
   { value: 1, label: "Hotel" },
   { value: 2, label: "Restaurant" },
   { value: 3, label: "Ferry" },
-  { value: 4, label: "Park" },
-  { value: 5, label: "Events" },
+  { value: 4, label: "Theme Park" },
+  { value: 5, label: "Beach Event" },
 ];
 
 export default function CreateOrganizationModal({
@@ -152,14 +152,14 @@ export default function CreateOrganizationModal({
           <div className="flex flex-col flex-1 min-w-[200px]">
             <label className="text-sm text-gray-600 mb-1">Type</label>
             <select
-              name="type"
-              value={form.type}
+              name="orgType"
+              value={form.orgType}
               onChange={onFormChange}
               className="border px-3 py-2 rounded text-black"
             >
-              {orgTypes.map((type) => (
-                <option key={type.value} value={type.value}>
-                  {type.label}
+              {orgTypes.map((orgType) => (
+                <option key={orgType.value} value={orgType.value}>
+                  {orgType.label}
                 </option>
               ))}
             </select>

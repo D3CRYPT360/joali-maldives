@@ -47,7 +47,6 @@ export default function ServicesPage() {
   const [orgOptions, setOrgOptions] = useState<OrgOption[]>([]);
   const [serviceTypeOptions, setServiceTypeOptions] = useState<ServiceTypeOption[]>([]);
 
-  // Fetch services/orgs/serviceTypes
   useEffect(() => {
     fetchAll();
   }, []);
@@ -71,7 +70,6 @@ export default function ServicesPage() {
     }
   }
 
-  // Filtered list based on search
   const filteredServices = services.filter((svc) => {
     const searchLower = search.toLowerCase();
     return (
@@ -82,7 +80,6 @@ export default function ServicesPage() {
     );
   });
 
-  // Handle form changes
   const handleFormChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
@@ -95,13 +92,11 @@ export default function ServicesPage() {
     }));
   };
 
-  // Handle form submit
-  const handleFormSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleFormSubmit = async (formData: typeof initialForm) => {
     setFormLoading(true);
     setFormError("");
     try {
-      await api.createService(form);
+      await api.createService(formData);
       setShowModal(false);
       setForm(initialForm);
       fetchAll();
@@ -113,7 +108,9 @@ export default function ServicesPage() {
   };
 
   return (
-    <div className="relative w-full min-h-screen bg-gray-100">
+    <>
+      <div className="fixed inset-0 bg-gray-100 -z-10"></div>
+      <div className="relative w-screen min-h-screen bg-gray-100 overflow-x-auto">
       <div className="flex">
         <SideBar />
         <div className="flex-1 p-8">
@@ -138,33 +135,36 @@ export default function ServicesPage() {
                 </button>
               </div>
             </div>
+
             {loading ? (
               <div className="text-center py-10 text-gray-500">Loading...</div>
             ) : error ? (
               <div className="text-center py-10 text-red-500">{error}</div>
             ) : (
               <div className="overflow-x-auto rounded-lg border">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
+                <table className="min-w-full divide-y divide-gray-200 table-auto">
+                  <thead className="bg-gray-50 text-xs text-gray-500 uppercase">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Organization</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Service Type</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Image</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Capacity</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Duration</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                      <th className="px-6 py-3 text-left">ID</th>
+                      <th className="px-6 py-3 text-left">Name</th>
+                      <th className="px-6 py-3 text-left">Description</th>
+                      <th className="px-6 py-3 text-left">Price</th>
+                      <th className="px-6 py-3 text-left">Organization</th>
+                      <th className="px-6 py-3 text-left">Service Type</th>
+                      <th className="px-6 py-3 text-left">Image</th>
+                      <th className="px-6 py-3 text-left">Capacity</th>
+                      <th className="px-6 py-3 text-left">Duration</th>
+                      <th className="px-6 py-3 text-left">Status</th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200 text-black">
+                  <tbody className="bg-white divide-y divide-gray-200 text-sm text-black">
                     {filteredServices.map((svc) => (
                       <tr key={svc.id}>
                         <td className="px-6 py-4 whitespace-nowrap">{svc.id}</td>
                         <td className="px-6 py-4 whitespace-nowrap">{svc.name}</td>
-                        <td className="px-6 py-4 whitespace-nowrap">{svc.description}</td>
+                        <td className="px-6 py-4 whitespace-nowrap max-w-[200px] truncate" title={svc.description}>
+                          {svc.description}
+                        </td>
                         <td className="px-6 py-4 whitespace-nowrap">${svc.price}</td>
                         <td className="px-6 py-4 whitespace-nowrap">{svc.organization?.name || svc.orgId}</td>
                         <td className="px-6 py-4 whitespace-nowrap">{svc.serviceType?.name || svc.serviceTypeId}</td>
@@ -184,15 +184,16 @@ export default function ServicesPage() {
                               checked={!!svc.isActive}
                               onChange={async () => {
                                 try {
-                                  // Optimistic UI update
-                                  setServices((prev) => prev.map((s) => s.id === svc.id ? { ...s, isActive: !s.isActive } : s));
+                                  setServices((prev) =>
+                                    prev.map((s) => s.id === svc.id ? { ...s, isActive: !s.isActive } : s)
+                                  );
                                   await api.toggleService(svc.id);
-                                  // Optionally re-fetch to sync state
                                   fetchAll();
                                 } catch (err) {
                                   setError((err as any).message || "Failed to toggle service");
-                                  // Revert UI if error
-                                  setServices((prev) => prev.map((s) => s.id === svc.id ? { ...s, isActive: !!svc.isActive } : s));
+                                  setServices((prev) =>
+                                    prev.map((s) => s.id === svc.id ? { ...s, isActive: !!svc.isActive } : s)
+                                  );
                                 }
                               }}
                               className="sr-only peer"
@@ -210,6 +211,7 @@ export default function ServicesPage() {
           </div>
         </div>
       </div>
+
       {/* Modal for creating service */}
       <CreateServiceModal
         open={showModal}
@@ -223,6 +225,7 @@ export default function ServicesPage() {
         orgOptions={orgOptions}
         serviceTypeOptions={serviceTypeOptions}
       />
-    </div>
+  </div>
+  </>
   );
 }

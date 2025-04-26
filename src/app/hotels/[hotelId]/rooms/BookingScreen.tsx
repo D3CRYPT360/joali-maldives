@@ -29,6 +29,14 @@ export default function BookingScreen({
   const router = useRouter();
 
   const handleBook = async () => {
+    if (!checkIn || !checkOut) {
+      setError("Please select both check-in and check-out dates.");
+      return;
+    }
+    if (nights <= 0) {
+      setError("Please select a valid date range (at least one night).");
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
@@ -38,7 +46,7 @@ export default function BookingScreen({
         scheduledFor: checkIn || new Date().toISOString(),
       });
       if (bookingId) {
-        router.push(`/hotels/${hotelId}/rooms/payment?bookingId=${bookingId}`);
+        router.push(`/payment?bookingId=${bookingId}`)
       } else {
         setError("Booking successful, but no booking ID returned.");
       }
@@ -48,6 +56,7 @@ export default function BookingScreen({
       setLoading(false);
     }
   };
+
 
   return (
     <div className="min-h-screen bg-[#faf7f2] px-4 py-8">
@@ -97,6 +106,7 @@ export default function BookingScreen({
                   <input
                     type="date"
                     value={checkIn}
+                    min={new Date().toISOString().split('T')[0]}
                     onChange={(e) => setCheckIn(e.target.value)}
                     className="w-full px-3 py-2 rounded-lg border border-[#ecd3b6] bg-[#faf7f2] focus:ring-2 focus:ring-[#8B4513] focus:outline-none text-black"
                   />
@@ -108,7 +118,7 @@ export default function BookingScreen({
                   <input
                     type="date"
                     value={checkOut}
-                    min={checkIn}
+                    min={checkIn || new Date().toISOString().split('T')[0]}
                     onChange={(e) => setCheckOut(e.target.value)}
                     className="w-full px-3 py-2 rounded-lg border border-[#ecd3b6] bg-[#faf7f2] focus:ring-2 focus:ring-[#8B4513] focus:outline-none text-black"
                   />

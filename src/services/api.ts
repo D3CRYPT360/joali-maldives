@@ -358,15 +358,17 @@ class JoaliApi {
   }
 
   async createOrganization(
-    org: Omit<
-      Organization,
-      | "id"
-      | "createdAt"
-      | "updatedAt"
-      | "parentOrganizationId"
-      | "parentOrganization"
-      | "isActive"
-    >
+    org: {
+      name: string,
+      registrationNumber: string,
+      email: string,
+      phone: string,
+      address: string,
+      country: string,
+      logoUrl: string,
+      website: string,
+      orgType: number
+    }
   ) {
     const res = await this.fetchWithAuth(
       `${this.baseUrl}/api/Organization/Create`,

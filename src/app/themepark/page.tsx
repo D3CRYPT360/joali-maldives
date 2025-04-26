@@ -1,48 +1,34 @@
 "use client";
 import React from "react";
 
-const activities = [
-  {
-    image: "/images/themepark1.jpg",
-    title: "Roller Coaster Adventure",
-    location: "Adventure Zone",
-    price: 50,
-  },
-  {
-    image: "/images/themepark2.jpg",
-    title: "Water Slide Splash",
-    location: "Aqua World",
-    price: 40,
-  },
-  {
-    image: "/images/themepark3.jpg",
-    title: "Ferris Wheel Fun",
-    location: "Sky Plaza",
-    price: 30,
-  },
-  {
-    image: "/images/themepark4.jpg",
-    title: "Haunted House",
-    location: "Mystery Mansion",
-    price: 35,
-  },
-  {
-    image: "/images/themepark5.jpg",
-    title: "Bumper Cars",
-    location: "Fun Arena",
-    price: 25,
-  },
-  {
-    image: "/images/themepark6.jpg",
-    title: "Mini Golf",
-    location: "Green Fields",
-    price: 20,
-  },
-];
+
 
 import ActivityCard from "@/components/ActivityCard";
 
+import { useEffect, useState } from "react";
+import { api } from "@/services/api";
+
 export default function ThemeParkActivitiesPage() {
+  const [activities, setActivities] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setLoading(true);
+    setError(null);
+    api.getAllServices({ typeId: 2 })
+      .then((data: any) => {
+        setActivities(Array.isArray(data) ? data : []);
+        setLoading(false);
+      })
+      .catch((err: any) => {
+        setError(
+          err?.message || "Failed to fetch activities. Please try again later."
+        );
+        setLoading(false);
+      });
+  }, []);
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#f8f3f1] to-[#f7f5f3] py-16">
       <div className="max-w-6xl mx-auto px-4">
@@ -52,18 +38,44 @@ export default function ThemeParkActivitiesPage() {
         <p className="text-lg text-center text-[#8B4513] mb-10">
           Discover and book your favorite theme park adventures
         </p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-          {activities.map((activity, idx) => (
-            <ActivityCard
-              key={idx}
-              image={activity.image}
-              title={activity.title}
-              location={activity.location}
-              price={activity.price?.toString()}
-              buttonLabel="Book Activity"
-            />
-          ))}
-        </div>
+        {loading ? (
+          <div className="text-center text-[#8B4513] text-lg">Loading activities...</div>
+        ) : error ? (
+          <div className="text-center text-red-600 text-lg">{error}</div>
+        ) : activities.length === 0 ? (
+          <div className="text-center text-[#8B4513] text-lg">No activities found for this theme park.</div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+            {activities.map((activity, idx) => (
+              <ActivityCard
+                key={activity.id || idx}
+                image={activity.imageUrl || "/images/themepark-placeholder.jpg"}
+                title={activity.name}
+                location={activity.location || activity.serviceType?.name || "Theme Park"}
+                price={activity.price?.toString()}
+                buttonLabel="Purchase"
+                onButtonClick={async () => {
+                  try {
+                    // Place a service order for this activity
+                    const bookingId = await api.placeServiceOrder({
+                      serviceId: activity.id,
+                      quantity: 1,
+                      scheduledFor: new Date().toISOString(), // or allow user to pick
+                    });
+                    // Redirect to payment gateway with bookingId
+                    if (bookingId) {
+                      window.location.href = `/payment?bookingId=${bookingId}`;
+                    } else {
+                      alert('Failed to create booking for payment.');
+                    }
+                  } catch (err: any) {
+                    alert(err.message || 'Failed to create booking.');
+                  }
+                }}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
