@@ -5,6 +5,7 @@ import SideBar from "@/components/SideBar";
 
 import { useEffect } from "react";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { api } from "../../services/api";
 
 type User = {
@@ -19,7 +20,20 @@ type User = {
   staffRole?: string;
 };
 
-export default function page() {
+
+
+export default function UsersPage() {
+  const router = useRouter();
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const role = localStorage.getItem('role');
+      const userId = localStorage.getItem('user_id');
+      if (role === 'Customer' && userId) {
+        router.replace(`/home/${userId}`);
+      }
+    }
+  }, [router]);
+
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");

@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import SideBar from "@/components/SideBar";
+import { useRouter } from "next/navigation";
 import { api } from "../../services/api";
 
 type ServiceType = {
@@ -10,7 +11,19 @@ type ServiceType = {
   description: string;
 };
 
+
+
 export default function ServiceTypesPage() {
+  const router = useRouter();
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const role = localStorage.getItem('role');
+      const userId = localStorage.getItem('user_id');
+      if (role === 'Customer' && userId) {
+        router.replace(`/home/${userId}`);
+      }
+    }
+  }, [router]);
   const [serviceTypes, setServiceTypes] = useState<ServiceType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");

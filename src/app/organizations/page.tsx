@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import SideBar from "@/components/SideBar";
 import CreateOrganizationModal from "@/components/CreateOrganizationModal";
 import { api } from "../../services/api";
@@ -32,7 +33,18 @@ type Organization = {
   orgType: number;
 };
 
-const Organizations = () => {
+export default function OrganizationsPage() {
+  const router = useRouter();
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const role = localStorage.getItem('role');
+      const userId = localStorage.getItem('user_id');
+      if (role === 'Customer' && userId) {
+        router.replace(`/home/${userId}`);
+      }
+    }
+  }, [router]);
+
   const [orgs, setOrgs] = useState<Organization[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -234,9 +246,18 @@ const Organizations = () => {
             onFormChange={handleFormChange}
           />
         </div>
+        <CreateOrganizationModal
+          open={showModal}
+          onClose={() => setShowModal(false)}
+          onSubmit={handleFormSubmit}
+          loading={formLoading}
+          error={formError}
+          success={formSuccess}
+          form={{ ...form }}
+          onFormChange={handleFormChange}
+        />
       </div>
     </div>
   );
-};
+}
 
-export default Organizations;

@@ -65,7 +65,6 @@ export default function UserHomePage() {
                       <div className="flex flex-col justify-between flex-1">
                         <div>
                           <h3 className="text-lg font-bold text-[#5B2415] mb-1">{order.service?.name || "Room"}</h3>
-                          <p className="text-sm text-[#8B4513] mb-1">{order.service?.description}</p>
                         </div>
                         <div className="text-xs text-gray-600 mt-2">
                           <div>Booking ID: {order.id}</div>
