@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { api } from "@/services/api";
+import { orderService } from "@/services/index";
 import Image from "next/image";
 
 export default function BookingScreen({
@@ -40,7 +40,7 @@ export default function BookingScreen({
     setLoading(true);
     setError(null);
     try {
-      const bookingId = await api.placeServiceOrder({
+      const bookingId = await orderService.placeServiceOrder({
         serviceId: room.id,
         quantity: nights,
         scheduledFor: checkIn || new Date().toISOString(),

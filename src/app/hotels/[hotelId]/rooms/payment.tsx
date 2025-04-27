@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { api } from "@/services/api";
+import { orderService } from "@/services/index";
 
 export default function PaymentPage() {
   const router = useRouter();
@@ -32,7 +32,7 @@ export default function PaymentPage() {
     setLoading(true);
     try {
       // Use the api service for payment
-      await api.payForBooking(bookingId);
+      await orderService.payForBooking(bookingId);
       setSuccess("Payment successful! Redirecting to home...");
       setTimeout(() => router.push("/"), 1800);
     } catch (err: any) {

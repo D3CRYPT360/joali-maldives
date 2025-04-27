@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { api } from "../../services/api";
+import { authService } from "@/services/index";
 
 export default function InitialPasswordSetupPage() {
   const router = useRouter();
@@ -29,10 +29,10 @@ export default function InitialPasswordSetupPage() {
     }
     setLoading(true);
     try {
-      await api.resetInitialPassword(email, temporaryKey, newPassword);
+      await authService.resetInitialPassword({ email, temporaryKey, newPassword });
       setSuccess("Password has been set. Redirecting to login...");
       setTimeout(() => router.push("/login"), 2000);
-      api.logout();
+      authService.logout();
     } catch (err: any) {
       setError(err.message || "An error occurred.");
     } finally {

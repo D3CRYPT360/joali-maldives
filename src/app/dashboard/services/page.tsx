@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import SideBar from "@/components/SideBar";
 import CreateServiceModal from "@/components/CreateServiceModal";
-import { api } from "@/services/api";
+import { serviceService, organizationService } from "@/services/index";
 import withAuth from "@/components/withAuth";
 
 type Service = {
@@ -70,12 +70,31 @@ function ServicesPage() {
     try {
       const [servicesRes, orgsRes, typesRes] = await Promise.all([
         staffOrgId
-          ? api.getAllServices({ orgId: staffOrgId })
-          : api.getAllServices(),
-        api.getAllOrganizations(),
-        api.getAllServiceTypes(),
+          ? serviceService.getAllServices({ orgId: staffOrgId })
+          : serviceService.getAllServices(),
+        organizationService.getAllOrganizations(),
+        serviceService.getAllServiceTypes(),
       ]);
-      setServices(Array.isArray(servicesRes) ? servicesRes : []);
+      // Map the services to ensure they match our local Service type
+      setServices(
+        Array.isArray(servicesRes)
+          ? servicesRes.map((svc: any) => ({
+              id: svc.id || 0, // Ensure id is never undefined
+              name: svc.name,
+              description: svc.description,
+              price: svc.price,
+              orgId: svc.orgId,
+              organization: svc.organization,
+              serviceTypeId: svc.serviceTypeId,
+              serviceType: svc.serviceType,
+              imageUrl: svc.imageUrl,
+              capacity: svc.capacity,
+              durationInMinutes: svc.durationInMinutes,
+              createdAt: svc.createdAt,
+              isActive: svc.isActive
+            }))
+          : []
+      );
       setOrgOptions(
         Array.isArray(orgsRes)
           ? orgsRes.map((o: any) => ({ id: o.id, name: o.name }))
@@ -139,7 +158,7 @@ function ServicesPage() {
     setFormLoading(true);
     setFormError("");
     try {
-      await api.createService(formData);
+      await serviceService.createService(formData);
       setShowModal(false);
       setForm(initialForm);
       fetchAll();
@@ -273,7 +292,7 @@ function ServicesPage() {
                                           : s
                                       )
                                     );
-                                    await api.toggleService(svc.id);
+                                    await serviceService.toggleService(svc.id);
                                     fetchAll();
                                   } catch (err) {
                                     setError(

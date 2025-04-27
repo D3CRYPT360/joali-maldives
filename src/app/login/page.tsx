@@ -1,9 +1,9 @@
 "use client";
 import Link from "next/link";
 import React, { useState } from "react";
-import { api } from "../../services/api";
+import { authService } from "@/services/index";
 import { useRouter } from "next/navigation";
-import { jwtDecode } from "jwt-decode";
+import { API_KEY } from "@/types/types";
 
 export default function login_page() {
   const [email, setEmail] = useState("");
@@ -24,7 +24,13 @@ export default function login_page() {
       return;
     }
     try {
-      const data = await api.login({ email, password });
+      console.log("Login attempt with:", { email, password: "***" });
+      const data = await authService.login({
+        email,
+        password,
+        apiKey: API_KEY,
+      });
+      console.log("Login response:", data);
       // Check for initial password setup redirect
       if (data.message === "RedirectToInitialPasswordPage" && data.data) {
         const { email, code } = data.data;
@@ -36,35 +42,17 @@ export default function login_page() {
         return;
       }
       setSuccess(data.message || "Login successful!");
-      // Store access token in localStorage if present in response
-      if (data.accessToken) {
-        localStorage.setItem("accessToken", data.accessToken);
-      }
-      const accessToken = data.accessToken || api.getAccessToken();
-      if (accessToken) {
-        const decoded = jwtDecode(accessToken) as { [key: string]: any };
-        const name = decoded["name"] || decoded.name || "User";
-        // Fix: Use a variable that's not shadowed by the local declaration
-        const userIdFromToken = decoded["userId"] || "";
-        const role = decoded["role"] || "";
-        const hasBooking = decoded["hasBooking"] || false;
-        const orgId = decoded["OrgId"] || "";
-        if (typeof window !== "undefined") {
-          localStorage.setItem("user_name", name);
-          localStorage.setItem("user_id", userIdFromToken);
-          localStorage.setItem("role", role);
-          localStorage.setItem("hasBooking", hasBooking.toString());
-          localStorage.setItem("OrgId", orgId);
-        }
-        
-        // Fix: Use the correct variable for redirection
-        if (userIdFromToken) {
-          router.push(`/home/${userIdFromToken}`);
-        } else {
-          router.push("/");
-        }
+      // The token and user info are now stored by the AuthService
+      // Let's get the user ID for redirection
+      const userInfo = authService.getUserInfoFromToken();
+      console.log("User info from token:", userInfo);
+
+      // Check if we have user info for redirection
+      if (userInfo && userInfo.userId) {
+        // Use the userId from userInfo for redirection
+        router.push(`/home/${userInfo.userId}`);
       } else {
-        // No token available, redirect to home page
+        // No user info available, redirect to home page
         router.push("/");
       }
     } catch (err: any) {

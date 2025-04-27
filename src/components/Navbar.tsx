@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { api } from "../services/api";
+import { authService } from "@/services/index";
 
 const Navbar = () => {
   const router = useRouter();
@@ -11,9 +11,9 @@ const Navbar = () => {
 
   useEffect(() => {
     // Check if accessToken exists in localStorage
-    setIsLoggedIn(!!api.getAccessToken());
+    setIsLoggedIn(!!authService.getAccessToken());
     // Listen to storage changes (for multi-tab logout/login)
-    const handleStorage = () => setIsLoggedIn(!!api.getAccessToken());
+    const handleStorage = () => setIsLoggedIn(!!authService.getAccessToken());
     window.addEventListener("storage", handleStorage);
     return () => window.removeEventListener("storage", handleStorage);
   }, []);
@@ -21,7 +21,7 @@ const Navbar = () => {
   const handleLogout = async () => {
     setLoading(true);
     try {
-      await api.logout();
+      await authService.logout();
     } catch (err) {
       alert((err as any).message || "Logout failed");
     } finally {
@@ -66,7 +66,8 @@ const Navbar = () => {
             About
           </a>
           {typeof window !== "undefined" &&
-            localStorage.getItem("role") !== "Customer" && (
+            (localStorage.getItem("role") === "Admin" ||
+              localStorage.getItem("role") === "Staff") && (
               <Link href="/dashboard" className="hover:text-opacity-80">
                 Dashboard
               </Link>

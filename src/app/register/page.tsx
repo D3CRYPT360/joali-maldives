@@ -2,7 +2,7 @@
 import Link from "next/link";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { api } from "../../services/api";
+import { userService } from "@/services/index";
 
 export default function register_page() {
   const router = useRouter();
@@ -27,7 +27,7 @@ export default function register_page() {
       return;
     }
     try {
-      const { message } = await api.customerRegister({
+      const { message } = await userService.customerRegister({
         name,
         email,
         phone,
@@ -78,7 +78,7 @@ export default function register_page() {
           </h2>
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-black">
+              <label className="block text-sm font-medium text-gray-900">
                 Name
               </label>
               <input
@@ -86,12 +86,12 @@ export default function register_page() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
-                className="w-full px-4 py-2 mt-1 border rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-400 focus:outline-none text-black"
+                className="w-full px-4 py-2 mt-1 border rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-400 focus:outline-none"
                 placeholder="Enter your Name"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-black">
+              <label className="block text-sm font-medium text-gray-900">
                 Email
               </label>
               <input
@@ -99,12 +99,12 @@ export default function register_page() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full px-4 py-2 mt-1 border rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-400 focus:outline-none text-black"
+                className="w-full px-4 py-2 mt-1 border rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-400 focus:outline-none"
                 placeholder="Enter your Email"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-black">
+              <label className="block text-sm font-medium text-gray-900">
                 Phone No
               </label>
               <input
@@ -112,13 +112,13 @@ export default function register_page() {
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 required
-                className="w-full px-4 py-2 mt-1 border rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-400 focus:outline-none text-black"
+                className="w-full px-4 py-2 mt-1 border rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-400 focus:outline-none"
                 placeholder="With Country Code"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-black">
+              <label className="block text-sm font-medium text-gray-900">
                 Password
               </label>
               <input
@@ -126,7 +126,7 @@ export default function register_page() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full px-4 py-2 mt-1 border rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-400 focus:outline-none text-black"
+                className="w-full px-4 py-2 mt-1 border rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-400 focus:outline-none"
                 placeholder="Enter your password"
               />
             </div>
@@ -139,7 +139,7 @@ export default function register_page() {
                 value={passwordConfirm}
                 onChange={(e) => setPasswordConfirm(e.target.value)}
                 required
-                className="w-full px-4 py-2 mt-1 border rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-400 focus:outline-none text-black"
+                className="w-full px-4 py-2 mt-1 border rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-400 focus:outline-none"
                 placeholder="Re-enter your password"
               />
             </div>

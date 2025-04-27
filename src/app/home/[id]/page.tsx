@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Navbar from "@/components/Navbar";
 
-import { api } from "@/services/api";
+import { orderService } from "@/services/index";
 
 export default function UserHomePage() {
   const { id } = useParams();
@@ -19,7 +19,7 @@ export default function UserHomePage() {
     }
     setLoading(true);
     setError(null);
-    api.getMyServiceOrders()
+    orderService.getMyServiceOrders()
       .then((data: any[]) => {
         setOrders(Array.isArray(data) ? data : []);
         setLoading(false);

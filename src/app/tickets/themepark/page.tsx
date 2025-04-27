@@ -2,7 +2,7 @@
 import React from "react";
 import ActivityCard from "@/components/ActivityCard";
 import { useEffect, useState } from "react";
-import { api } from "@/services/api";
+import { serviceService, orderService } from "@/services/index";
 import withBookingCheck from "@/components/withBookingCheck";
 
 function ThemeParkActivitiesPage() {
@@ -13,7 +13,7 @@ function ThemeParkActivitiesPage() {
   useEffect(() => {
     setLoading(true);
     setError(null);
-    api.getAllServices({ typeId: 2 })
+    serviceService.getAllServices({ typeId: 2 })
       .then((data: any) => {
         setActivities(Array.isArray(data) ? data : []);
         setLoading(false);
@@ -54,7 +54,7 @@ function ThemeParkActivitiesPage() {
                 onButtonClick={async () => {
                   try {
                     // Place a service order for this activity
-                    const bookingId = await api.placeServiceOrder({
+                    const bookingId = await orderService.placeServiceOrder({
                       serviceId: activity.id,
                       quantity: 1,
                       scheduledFor: new Date().toISOString(), // or allow user to pick

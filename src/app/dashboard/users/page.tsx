@@ -6,7 +6,7 @@ import SideBar from "@/components/SideBar";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { api } from "@/services/api";
+import { userService } from "@/services/index";
 import withAuth from "@/components/withAuth";
 
 type User = {
@@ -38,7 +38,7 @@ function UsersPage() {
       setLoading(true);
       setError("");
       try {
-        const data = await api.getAllUsers();
+        const data = await userService.getAllUsers();
         setUsers(data);
       } catch (err) {
         setError((err as any).message || "Failed to fetch users");
@@ -146,7 +146,7 @@ function UsersPage() {
                                   checked={user.isActive}
                                   onChange={async () => {
                                     try {
-                                      await api.toggleUser(user.email);
+                                      await userService.toggleUser(user.email);
                                       setUsers((users) =>
                                         users.map((u) =>
                                           u.id === user.id

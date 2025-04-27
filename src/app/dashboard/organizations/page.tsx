@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import SideBar from "@/components/SideBar";
 import CreateOrganizationModal from "@/components/CreateOrganizationModal";
-import { api } from "@/services/api";
+import { organizationService } from "@/services/index";
 import withAuth from "@/components/withAuth";
 
 const orgTypes = [
@@ -63,7 +63,7 @@ function OrganizationsPage() {
       setLoading(true);
       setError("");
       try {
-        const data = await api.getAllOrganizations();
+        const data = await organizationService.getAllOrganizations();
         // Normalize: always use orgType in frontend
         setOrgs(data.map((org: any) => ({ ...org, orgType: org.type })));
       } catch (err: any) {
@@ -92,11 +92,11 @@ function OrganizationsPage() {
     try {
       // Ensure orgType is always a number
       const cleanFormData = { ...formData, orgType: Number(formData.orgType) };
-      await api.createOrganization(cleanFormData);
+      await organizationService.createOrganization(cleanFormData);
       setFormSuccess("Organization created successfully!");
       setForm(initialFormState);
       setShowModal(false);
-      const orgData = await api.getAllOrganizations();
+      const orgData = await organizationService.getAllOrganizations();
       setOrgs(orgData.map((org: any) => ({ ...org, orgType: org.type })));
     } catch (err: any) {
       setFormError(err.message || "Failed to create organization");
@@ -200,7 +200,7 @@ function OrganizationsPage() {
                                 checked={org.isActive}
                                 onChange={async () => {
                                   try {
-                                    await api.toggleOrganization(org.id);
+                                    await organizationService.toggleOrganization(org.id);
                                     setOrgs((orgs) =>
                                       orgs.map((o) =>
                                         o.id === org.id

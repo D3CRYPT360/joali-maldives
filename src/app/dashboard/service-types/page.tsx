@@ -3,14 +3,9 @@
 import React, { useEffect, useState } from "react";
 import SideBar from "@/components/SideBar";
 import { useRouter } from "next/navigation";
-import { api } from "@/services/api";
+import { serviceService } from "@/services/index";
 import withAuth from "@/components/withAuth";
-
-type ServiceType = {
-  id: number;
-  name: string;
-  description: string;
-};
+import { ServiceType } from "@/types/types";
 
 function ServiceTypesPage() {
   const router = useRouter();
@@ -35,7 +30,7 @@ function ServiceTypesPage() {
     setLoading(true);
     setError("");
     try {
-      const data = await api.getAllServiceTypes();
+      const data = await serviceService.getAllServiceTypes();
       setServiceTypes(Array.isArray(data) ? data : []);
     } catch (err) {
       setError((err as any).message || "Failed to fetch service types");
@@ -70,7 +65,7 @@ function ServiceTypesPage() {
     setFormError("");
     setFormLoading(true);
     try {
-      await api.createServiceType({
+      await serviceService.createServiceType({
         name: form.name,
         description: form.description,
       });

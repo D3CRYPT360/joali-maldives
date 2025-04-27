@@ -2,7 +2,7 @@
 import React from "react";
 import Image from "next/image";
 
-import { api } from "@/services/api";
+import { serviceService } from "@/services/index";
 import { useEffect, useState } from "react";
 import BookingScreen from "./BookingScreen";
 import { useRouter } from "next/navigation";
@@ -52,7 +52,7 @@ export default function HotelRoomsPage({
   useEffect(() => {
     setLoading(true);
     setError(null);
-    api
+    serviceService
       .getAllServices({ orgId: hotelId, typeId: 1 })
       .then((data: any) => {
         setRooms(Array.isArray(data) ? data : []);

@@ -1,7 +1,7 @@
 "use client";
 import ActivityCard from "@/components/ActivityCard";
 
-import { api } from "../../services/api";
+import { organizationService } from "@/services/index";
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -34,7 +34,7 @@ export default function HotelsPage() {
       setLoading(true);
       setError("");
       try {
-        const data = await api.getAllOrganizations(0); // orgType 0
+        const data = await organizationService.getAllOrganizations(1); // orgType 1
         setHotels(data);
         if (typeof window !== "undefined") {
           localStorage.setItem("hotels", JSON.stringify(data));

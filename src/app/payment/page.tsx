@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { api } from "@/services/api";
+import { orderService } from "@/services/index";
 
 export default function PaymentPage() {
   const router = useRouter();
@@ -24,9 +24,12 @@ export default function PaymentPage() {
   React.useEffect(() => {
     if (!bookingId) return;
     setOrderLoading(true);
-    api.getMyServiceOrders()
+    orderService
+      .getMyServiceOrders()
       .then((orders: any[]) => {
-        const found = orders.find((o: any) => String(o.id) === String(bookingId));
+        const found = orders.find(
+          (o: any) => String(o.id) === String(bookingId)
+        );
         setOrder(found || null);
         setOrderLoading(false);
       })
@@ -49,9 +52,22 @@ export default function PaymentPage() {
     try {
       // Send bookingId to payment endpoint
       // Use the api service for payment
-      await api.payForBooking(bookingId);
-      setSuccess("Payment successful! Redirecting to home...");
-      setTimeout(() => router.push("/"), 1800);
+      await orderService.payForBooking(bookingId);
+
+      // Get user ID from localStorage for redirection
+      const userId =
+        typeof window !== "undefined" ? localStorage.getItem("user_id") : null;
+
+      setSuccess("Payment successful! Redirecting to homepage");
+
+      // Redirect to user's home page if we have their ID, otherwise to main page
+      setTimeout(() => {
+        if (userId) {
+          router.push(`/home/${userId}`);
+        } else {
+          router.push("/");
+        }
+      }, 1800);
     } catch (err: any) {
       setError(err.message || "Payment failed.");
     } finally {
@@ -64,20 +80,31 @@ export default function PaymentPage() {
       <div className="w-full max-w-5xl flex flex-col md:flex-row shadow-none border-none">
         {/* Payment Summary Section */}
         <div className="md:w-1/2 flex flex-col justify-center items-center p-12 bg-gradient-to-br from-[#f6e9da] to-[#ecd3b6] border-b md:border-b-0 md:border-r border-[#ecd3b6] min-h-[500px]">
-          <img src="/images/payment-hero.png" alt="Payment" className="w-44 h-44 object-contain mb-8 drop-shadow-lg" />
-          <div className="text-4xl font-extrabold text-[#8B4513] mb-2 tracking-tight">Complete Your Payment</div>
-          <div className="text-[#7c4d1e] text-lg mb-6 text-center max-w-xs">Secure payment for your booking. We use encrypted transactions for your safety.</div>
+          <img
+            src="/images/payment-hero.png"
+            alt="Payment"
+            className="w-44 h-44 object-contain mb-8 drop-shadow-lg"
+          />
+          <div className="text-4xl font-extrabold text-[#8B4513] mb-2 tracking-tight">
+            Complete Your Payment
+          </div>
+          <div className="text-[#7c4d1e] text-lg mb-6 text-center max-w-xs">
+            Secure payment for your booking. We use encrypted transactions for
+            your safety.
+          </div>
           <div className="w-full flex flex-col gap-2 px-0 py-0">
             <div className="flex justify-between text-[#8B4513] font-semibold text-lg">
               <span>Booking ID</span>
-              <span>{bookingId || '-'}</span>
+              <span>{bookingId || "-"}</span>
             </div>
             {/* Add more booking details here if available */}
             <div className="flex justify-between text-[#8B4513] text-lg">
               <span>Amount Due</span>
               <span className="font-bold text-2xl">
                 {orderLoading ? (
-                  <span className="animate-pulse text-[#c2a46a]">Loading...</span>
+                  <span className="animate-pulse text-[#c2a46a]">
+                    Loading...
+                  </span>
                 ) : order && order.service ? (
                   <>${order.quantity * order.service.price}</>
                 ) : (
@@ -89,10 +116,14 @@ export default function PaymentPage() {
         </div>
         {/* Payment Form Section */}
         <div className="md:w-1/2 flex flex-col justify-center gap-8 px-8 py-16 bg-white/40 min-h-[500px]">
-          <h2 className="text-2xl font-bold mb-6 text-[#8B4513] text-center">Card Details</h2>
+          <h2 className="text-2xl font-bold mb-6 text-[#8B4513] text-center">
+            Card Details
+          </h2>
           <form onSubmit={handlePay} className="space-y-6">
             <div>
-              <label className="block text-sm font-medium mb-1 text-[#8B4513]">Cardholder Name</label>
+              <label className="block text-sm font-medium mb-1 text-[#8B4513]">
+                Cardholder Name
+              </label>
               <input
                 type="text"
                 value={name}
@@ -103,7 +134,9 @@ export default function PaymentPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1 text-[#8B4513]">Card Number</label>
+              <label className="block text-sm font-medium mb-1 text-[#8B4513]">
+                Card Number
+              </label>
               <input
                 type="text"
                 value={cardNumber}
@@ -117,7 +150,9 @@ export default function PaymentPage() {
             </div>
             <div className="flex gap-4">
               <div className="flex-1">
-                <label className="block text-sm font-medium mb-1 text-[#8B4513]">Expiry</label>
+                <label className="block text-sm font-medium mb-1 text-[#8B4513]">
+                  Expiry
+                </label>
                 <input
                   type="text"
                   value={expiry}
@@ -129,7 +164,9 @@ export default function PaymentPage() {
                 />
               </div>
               <div className="flex-1">
-                <label className="block text-sm font-medium mb-1 text-[#8B4513]">CVV</label>
+                <label className="block text-sm font-medium mb-1 text-[#8B4513]">
+                  CVV
+                </label>
                 <input
                   type="password"
                   value={cvv}

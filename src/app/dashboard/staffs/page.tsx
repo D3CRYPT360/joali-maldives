@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import SideBar from "@/components/SideBar";
-import { api } from "@/services/api";
+import { useRouter } from "next/navigation";
+import { organizationService, userService } from "@/services/index";
 import withAuth from "@/components/withAuth";
 
 type Staff = {
@@ -63,7 +63,7 @@ function StaffsPage() {
   // Fetch organizations for dropdown when modal opens
   useEffect(() => {
     if (showModal) {
-      api.getAllOrganizations().then((orgs) => {
+      organizationService.getAllOrganizations().then((orgs: any) => {
         setOrgOptions(
           Array.isArray(orgs)
             ? orgs.map((o: any) => ({ id: o.id, name: o.name }))
@@ -77,7 +77,7 @@ function StaffsPage() {
   const fetchOrgName = async (orgId: number) => {
     if (!orgId || orgNames[orgId]) return;
     try {
-      const org = await api.getOrganizationById(orgId);
+      const org = await organizationService.getOrganizationById(orgId);
       setOrgNames((prev) => ({
         ...prev,
         [orgId]: org?.name || `Org ${orgId}`,
@@ -93,10 +93,20 @@ function StaffsPage() {
     setError("");
     try {
       // Assume API endpoint: /api/User/AllStaffs or filter AllUsers by role (userType === staff)
-      const data = await api.getAllUsers();
+      const data = await userService.getAllUsers();
       // Filter for staff (userType === 1 or staffRole != null)
       const filtered = Array.isArray(data)
         ? data.filter((u: any) => u.userType === 1 || u.staffRole)
+            .map((user: any) => ({
+              id: user.id,
+              name: user.name,
+              email: user.email,
+              phoneNumber: user.phone || '', // Map phone to phoneNumber
+              staffRole: user.role,
+              createdAt: user.createdAt,
+              isActive: user.isActive,
+              orgId: user.organizationId || 0, // Map organizationId to orgId
+            }))
         : [];
       setStaffs(filtered);
     } catch (err) {
@@ -164,7 +174,7 @@ function StaffsPage() {
                       setFormError("");
                       setFormLoading(true);
                       try {
-                        await api.createStaff({
+                        await userService.createStaff({
                           name: form.name,
                           email: form.email,
                           phoneNumber: form.phoneNumber,
@@ -355,7 +365,9 @@ function StaffsPage() {
                                     checked={staff.isActive}
                                     onChange={async () => {
                                       try {
-                                        await api.toggleUser(staff.email);
+                                        await userService.toggleUser(
+                                          staff.email
+                                        );
                                         setStaffs((staffs) =>
                                           staffs.map((s) =>
                                             s.id === staff.id
