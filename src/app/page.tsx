@@ -2,10 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import { FaCalendarAlt, FaUser, FaSearch } from "react-icons/fa";
 import ActivityCard from "@/components/ActivityCard";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
 
 export default function Home() {
   const [checkInDate, setCheckInDate] = useState("");
@@ -35,8 +32,6 @@ export default function Home() {
 
   return (
     <div className="relative w-full min-h-screen bg-[#F9F9F9]">
-      <Navbar />
-
       {/* Hero Section */}
       <section className="pt-32 pb-20 px-4">
         <div className="container mx-auto grid md:grid-cols-2 gap-12 items-center">
@@ -86,8 +81,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      <Footer />
     </div>
   );
 }

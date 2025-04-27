@@ -1,7 +1,8 @@
 "use client";
 import React, { useState } from "react";
+import withBookingCheck from "@/components/withBookingCheck";
 
-export default function FerryBookingPage() {
+function FerryBookingPage() {
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -94,3 +95,5 @@ export default function FerryBookingPage() {
     </div>
   );
 }
+
+export default withBookingCheck(FerryBookingPage);

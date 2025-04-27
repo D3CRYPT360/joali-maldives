@@ -7,6 +7,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { api } from "@/services/api";
+import withAuth from "@/components/withAuth";
 
 type User = {
   id: number;
@@ -20,22 +21,9 @@ type User = {
   staffRole?: string;
 };
 
-export default function UsersPage() {
+function UsersPage() {
   const router = useRouter();
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const role = localStorage.getItem("role");
-      const userId = localStorage.getItem("user_id");
-      const user_name = localStorage.getItem("user_name");
-      if (
-        (role === "Customer" || role === "Staff") &&
-        userId &&
-        user_name !== "Admin"
-      ) {
-        router.replace(`/home/${userId}`);
-      }
-    }
-  }, [router]);
+  // Role-based access control is now handled by the withAuth HOC
 
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -189,3 +177,5 @@ export default function UsersPage() {
     </div>
   );
 }
+
+export default withAuth(UsersPage);

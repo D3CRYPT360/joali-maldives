@@ -1,14 +1,11 @@
 "use client";
 import React from "react";
-
-
-
 import ActivityCard from "@/components/ActivityCard";
-
 import { useEffect, useState } from "react";
 import { api } from "@/services/api";
+import withBookingCheck from "@/components/withBookingCheck";
 
-export default function ThemeParkActivitiesPage() {
+function ThemeParkActivitiesPage() {
   const [activities, setActivities] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -80,3 +77,5 @@ export default function ThemeParkActivitiesPage() {
     </div>
   );
 }
+
+export default withBookingCheck(ThemeParkActivitiesPage);

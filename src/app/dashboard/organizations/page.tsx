@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import SideBar from "@/components/SideBar";
 import CreateOrganizationModal from "@/components/CreateOrganizationModal";
 import { api } from "@/services/api";
+import withAuth from "@/components/withAuth";
 
 const orgTypes = [
   { value: 0, label: "Other" },
@@ -33,22 +34,9 @@ type Organization = {
   orgType: number;
 };
 
-export default function OrganizationsPage() {
+function OrganizationsPage() {
   const router = useRouter();
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const role = localStorage.getItem("role");
-      const userId = localStorage.getItem("user_id");
-      const user_name = localStorage.getItem("user_name");
-      if (
-        (role === "Customer" || role === "Staff") &&
-        userId &&
-        user_name !== "Admin"
-      ) {
-        router.replace(`/home/${userId}`);
-      }
-    }
-  }, [router]);
+  // Role-based access control is now handled by the withAuth HOC
 
   const [orgs, setOrgs] = useState<Organization[]>([]);
   const [loading, setLoading] = useState(true);
@@ -263,3 +251,5 @@ export default function OrganizationsPage() {
     </div>
   );
 }
+
+export default withAuth(OrganizationsPage);

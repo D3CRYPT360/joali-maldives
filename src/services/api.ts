@@ -1,6 +1,6 @@
 import { API_BASE, API_KEY } from "../types/types";
 import type { Organization, CustomerRegisterParams } from "../types/types";
-import { jwtDecode } from "jwt-decode";
+import axiosInstance from "@/utils/axiosInstace";
 
 class JoaliApi {
   /**
@@ -8,16 +8,22 @@ class JoaliApi {
    * @param bookingId The booking/order id to pay for
    */
   async payForBooking(bookingId: number | string) {
-    const res = await this.fetchWithAuth(`${this.baseUrl}/api/service/pay`, {
-      method: "POST",
-      headers: this.getAuthHeaders(),
-      body: String(bookingId),
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.message || "Payment failed");
+    try {
+      const response = await axiosInstance.post(
+        `${this.baseUrl}/api/service/pay`,
+        String(bookingId),
+        {
+          headers: {
+            "Content-Type": "text/plain", // assuming backend expects plain string
+          },
+        }
+      );
+      return response.data;
+    } catch (error: any) {
+      const message =
+        error.response?.data?.message || error.message || "Payment failed";
+      throw new Error(message);
     }
-    return data;
   }
 
   // --- Services ---
@@ -28,7 +34,6 @@ class JoaliApi {
   async getAllServices(filters?: {
     orgId?: number | string;
     typeId?: number | string;
-    [key: string]: any;
   }) {
     let url = `${this.baseUrl}/api/Service/all`;
     if (filters && Object.keys(filters).length > 0) {
@@ -40,19 +45,15 @@ class JoaliApi {
       });
       url += `?${params.toString()}`;
     }
-    const res = await this.fetchWithAuth(url, {
-      method: "GET",
-      headers: this.getAuthHeaders(),
-    });
-    let data = [];
-    const text = await res.text();
     try {
-      data = text ? JSON.parse(text) : [];
-    } catch (e) {
-      data = [];
+      const response = await axiosInstance.get(url);
+      let data = response.data;
+      if (!Array.isArray(data)) data = [];
+      return data;
+    } catch (error: any) {
+      console.error("Error fetching services:", error);
+      return [];
     }
-    if (!Array.isArray(data)) data = [];
-    return data;
   }
 
   async createService(service: {
@@ -65,91 +66,85 @@ class JoaliApi {
     capacity?: number;
     durationInMinutes?: number;
   }) {
-    const res = await this.fetchWithAuth(`${this.baseUrl}/api/Service/create`, {
-      method: "POST",
-      headers: this.getAuthHeaders(),
-      body: JSON.stringify(service),
-    });
-    let data = null;
-    const text = await res.text();
     try {
-      data = text ? JSON.parse(text) : null;
-    } catch (e) {
-      data = null;
+      const response = await axiosInstance.post(
+        `${this.baseUrl}/api/Service/create`,
+        service
+      );
+      return response.data;
+    } catch (error: any) {
+      const message = 
+        error.response?.data?.message || error.message || "Failed to create service";
+      throw new Error(message);
     }
-    if (!res.ok)
-      throw new Error((data && data.message) || "Failed to create service");
-    return data;
   }
 
   // --- Service Types ---
   async getAllServiceTypes() {
-    const res = await this.fetchWithAuth(
-      `${this.baseUrl}/api/Service/all-service-types`,
-      {
-        method: "GET",
-        headers: this.getAuthHeaders(),
-      }
-    );
-    let data = [];
-    const text = await res.text();
     try {
-      data = text ? JSON.parse(text) : [];
-    } catch (e) {
-      data = [];
+      const response = await axiosInstance.get(
+        `${this.baseUrl}/api/Service/all-service-types`
+      );
+      let data = response.data;
+      if (!Array.isArray(data)) data = [];
+      return data;
+    } catch (error: any) {
+      console.error("Error fetching service types:", error);
+      return [];
     }
-    if (!Array.isArray(data)) data = [];
-    return data;
   }
 
   async createServiceType(serviceType: { name: string; description: string }) {
-    const res = await this.fetchWithAuth(
-      `${this.baseUrl}/api/Service/create-service-type`,
-      {
-        method: "POST",
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify(serviceType),
-      }
-    );
-    let data = null;
-    const text = await res.text();
     try {
-      data = text ? JSON.parse(text) : null;
-    } catch (e) {
-      data = null;
-    }
-    if (!res.ok)
-      throw new Error(
-        (data && data.message) || "Failed to create service type"
+      const response = await axiosInstance.post(
+        `${this.baseUrl}/api/Service/create-service-type`,
+        serviceType
       );
-    return data;
+      return response.data;
+    } catch (error: any) {
+      const message = 
+        error.response?.data?.message || error.message || "Failed to create service type";
+      throw new Error(message);
+    }
   }
 
   async refreshTokenIfNeeded(): Promise<boolean> {
     const accessToken = this.getAccessToken();
     const refreshToken = this.getRefreshToken();
     if (!accessToken || !refreshToken) return false;
-    const res = await fetch(`${this.baseUrl}/api/Auth/RefreshToken`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ accessToken, refreshToken }),
-    });
-    const data = await res.json();
-    if (
-      res.ok &&
-      data.token &&
-      data.token.accessToken &&
-      data.token.refreshToken
-    ) {
-      this.setLocalStorage(data.token.accessToken, data.token.refreshToken);
-      return true;
+    
+    try {
+      // Use a direct fetch here instead of axiosInstance to avoid circular token refresh
+      const response = await fetch(`${this.baseUrl}/api/Auth/RefreshToken`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ accessToken, refreshToken }),
+      });
+      
+      const data = await response.json();
+      
+      if (
+        response.ok &&
+        data.token &&
+        data.token.accessToken &&
+        data.token.refreshToken
+      ) {
+        this.setLocalStorage(data.token.accessToken, data.token.refreshToken);
+        return true;
+      }
+      
+      this.clearTokens();
+      return false;
+    } catch (error) {
+      this.clearTokens();
+      return false;
     }
-    this.clearTokens();
-    return false;
   }
 
-  // Wrapper for fetch with auto token refresh
+  // This method is kept for backward compatibility but is no longer used
+  // All API calls now use axiosInstance which handles token refresh via interceptors
   async fetchWithAuth(input: RequestInfo, init?: RequestInit, retry = true) {
+    console.warn('fetchWithAuth is deprecated. Use axiosInstance instead.');
     let res = await fetch(input, init);
     if (res.status === 401 && retry) {
       const refreshed = await this.refreshTokenIfNeeded();
@@ -213,183 +208,149 @@ class JoaliApi {
   }
 
   async login({ email, password }: { email: string; password: string }) {
-    const res = await fetch(`${this.baseUrl}/api/Auth/Login`, {
-      method: "POST",
-      headers: this.getAuthHeaders(),
-      body: JSON.stringify({ email, password, apiKey: this.apiKey }),
-    });
-    const data = await res.json();
-    console.log(data);
-    if (!res.ok) {
-      console.error("Login error:", data);
-      throw new Error(data.message || JSON.stringify(data) || "Login failed");
+    try {
+      const response = await axiosInstance.post(
+        `${this.baseUrl}/api/Auth/Login`,
+        { email, password, apiKey: this.apiKey }
+      );
+      const data = response.data;
+      console.log(data);
+      
+      // Cache accessToken in localStorage
+      if (data.token && data.token.accessToken) {
+        this.setLocalStorage(data.token.accessToken, data.token.refreshToken);
+      }
+      
+      return data;
+    } catch (error: any) {
+      console.error("Login error:", error.response?.data);
+      const message = 
+        error.response?.data?.message || error.message || "Login failed";
+      throw new Error(message);
     }
-    // Cache accessToken in localStorage
-    if (data.token && data.token.accessToken) {
-      this.setLocalStorage(data.token.accessToken, data.token.refreshToken);
-    }
-
-    return data;
   }
 
   async customerRegister(params: CustomerRegisterParams) {
-    const res = await fetch(
-      `${this.baseUrl}/api/User/CustomerRegister?apiKey=${this.apiKey}`,
-      {
-        method: "POST",
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify(params),
-      }
-    );
-    const data = await res.json();
-    if (!res.ok) {
-      console.error("Registration error:", data);
-      throw new Error(
-        data.message || JSON.stringify(data) || "Registration failed"
+    try {
+      const response = await axiosInstance.post(
+        `${this.baseUrl}/api/User/CustomerRegister?apiKey=${this.apiKey}`,
+        params
       );
+      return response.data;
+    } catch (error: any) {
+      console.error("Registration error:", error.response?.data);
+      const message = 
+        error.response?.data?.message || error.message || "Registration failed";
+      throw new Error(message);
     }
-    return data;
   }
 
   async getAllUsers() {
-    const res = await this.fetchWithAuth(
-      `${this.baseUrl}/api/User/AllUsers?apiKey=${this.apiKey}`,
-      {
-        method: "GET",
-        headers: this.getAuthHeaders(),
-      }
-    );
-    const data = await res.json();
-    if (!res.ok) {
-      console.error("Get users error:", data);
-      throw new Error(
-        data.message || JSON.stringify(data) || "Failed to fetch users"
+    try {
+      const response = await axiosInstance.get(
+        `${this.baseUrl}/api/User/AllUsers?apiKey=${this.apiKey}`
       );
+      return response.data;
+    } catch (error: any) {
+      console.error("Get users error:", error);
+      const message = 
+        error.response?.data?.message || error.message || "Failed to fetch users";
+      throw new Error(message);
     }
-    return data;
   }
 
   async logout() {
     const accessToken = this.getAccessToken();
     if (!accessToken) throw new Error("No access token found");
-    const res = await this.fetchWithAuth(`${this.baseUrl}/api/Auth/Logout`, {
-      method: "POST",
-      headers: this.getAuthHeaders(),
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      console.error("Logout error:", data);
-      throw new Error(data.message || JSON.stringify(data) || "Logout failed");
+    
+    try {
+      const response = await axiosInstance.post(`${this.baseUrl}/api/Auth/Logout`);
+      this.clearTokens();
+      return response.data;
+    } catch (error: any) {
+      console.error("Logout error:", error.response?.data);
+      const message = 
+        error.response?.data?.message || error.message || "Logout failed";
+      throw new Error(message);
     }
-    this.clearTokens();
-    return data;
   }
 
   async toggleUser(email: string) {
-    const res = await this.fetchWithAuth(
-      `${this.baseUrl}/api/User/ToggleUser?apiKey=${this.apiKey}&Email=${email}`,
-      {
-        method: "PUT",
-        headers: this.getAuthHeaders(),
-      }
-    );
-    const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.message || "Failed to toggle user");
+    try {
+      const response = await axiosInstance.put(
+        `${this.baseUrl}/api/User/ToggleUser?apiKey=${this.apiKey}&Email=${email}`
+      );
+      return response.data;
+    } catch (error: any) {
+      const message = 
+        error.response?.data?.message || error.message || "Failed to toggle user";
+      throw new Error(message);
     }
-    return data;
   }
 
   async toggleOrganization(id: number) {
     console.log(id);
-    const res = await this.fetchWithAuth(
-      `${this.baseUrl}/api/Organization/toggle/${id}`,
-      {
-        method: "PUT",
-        headers: this.getAuthHeaders(),
-      }
-    );
-    const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.message || "Failed to toggle organization");
+    try {
+      const response = await axiosInstance.put(
+        `${this.baseUrl}/api/Organization/toggle/${id}`
+      );
+      return response.data;
+    } catch (error: any) {
+      const message = 
+        error.response?.data?.message || error.message || "Failed to toggle organization";
+      throw new Error(message);
     }
-    return data;
   }
 
   async getOrganizationById(id: number): Promise<Organization | null> {
-    const res = await this.fetchWithAuth(
-      `${this.baseUrl}/api/Organization/${id}`,
-      {
-        method: "GET",
-        headers: this.getAuthHeaders(),
-      }
-    );
-    let data: Organization | null = null;
-    const text = await res.text();
     try {
-      data = text ? JSON.parse(text) : null;
-    } catch (e) {
-      data = null;
-    }
-    if (!res.ok)
-      throw new Error(
-        (data && (data as any).message) || "Failed to fetch organization"
+      const response = await axiosInstance.get(
+        `${this.baseUrl}/api/Organization/${id}`
       );
-    return data;
+      return response.data;
+    } catch (error: any) {
+      const message = 
+        error.response?.data?.message || error.message || "Failed to fetch organization";
+      throw new Error(message);
+    }
   }
 
   async getAllOrganizations(orgType?: number): Promise<Organization[]> {
-    const res = await this.fetchWithAuth(
-      `${this.baseUrl}/api/Organization?orgtype=${orgType || ""}`,
-      {
-        method: "GET",
-        headers: this.getAuthHeaders(),
-      }
-    );
-    let data: Organization[] = [];
-    const text = await res.text();
     try {
-      data = text ? JSON.parse(text) : [];
-    } catch (e) {
-      data = [];
+      const response = await axiosInstance.get(
+        `${this.baseUrl}/api/Organization?orgtype=${orgType || ""}`
+      );
+      let data = response.data;
+      if (!Array.isArray(data)) data = [];
+      return data;
+    } catch (error: any) {
+      console.error("Error fetching organizations:", error);
+      return [];
     }
-    if (!Array.isArray(data)) data = [];
-    return data;
   }
 
-  async createOrganization(
-    org: {
-      name: string,
-      registrationNumber: string,
-      email: string,
-      phone: string,
-      address: string,
-      country: string,
-      logoUrl: string,
-      website: string,
-      orgType: number
-    }
-  ) {
-    const res = await this.fetchWithAuth(
-      `${this.baseUrl}/api/Organization/Create`,
-      {
-        method: "POST",
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify(org),
-      }
-    );
-    let data = null;
-    const text = await res.text();
+  async createOrganization(org: {
+    name: string;
+    registrationNumber: string;
+    email: string;
+    phone: string;
+    address: string;
+    country: string;
+    logoUrl: string;
+    website: string;
+    orgType: number;
+  }) {
     try {
-      data = text ? JSON.parse(text) : null;
-    } catch (e) {
-      data = null;
-    }
-    if (!res.ok)
-      throw new Error(
-        (data && data.message) || "Failed to create organization"
+      const response = await axiosInstance.post(
+        `${this.baseUrl}/api/Organization/Create`,
+        org
       );
-    return data;
+      return response.data;
+    } catch (error: any) {
+      const message = 
+        error.response?.data?.message || error.message || "Failed to create organization";
+      throw new Error(message);
+    }
   }
 
   async resetInitialPassword(
@@ -397,26 +358,17 @@ class JoaliApi {
     temporaryKey: string,
     newPassword: string
   ) {
-    const res = await this.fetchWithAuth(
-      `${this.baseUrl}/api/Auth/ResetPassword`,
-      {
-        method: "POST",
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify({ email, temporaryKey, newPassword }),
-      }
-    );
-    let data = null;
-    const text = await res.text();
     try {
-      data = text ? JSON.parse(text) : null;
-    } catch (e) {
-      data = null;
-    }
-    if (!res.ok)
-      throw new Error(
-        (data && data.message) || "Failed to reset initial password"
+      const response = await axiosInstance.post(
+        `${this.baseUrl}/api/Auth/ResetPassword`,
+        { email, temporaryKey, newPassword }
       );
-    return data;
+      return response.data;
+    } catch (error: any) {
+      const message = 
+        error.response?.data?.message || error.message || "Failed to reset initial password";
+      throw new Error(message);
+    }
   }
 
   async createStaff(staff: {
@@ -425,34 +377,30 @@ class JoaliApi {
     phoneNumber: string;
     orgId: number;
   }) {
-    const res = await this.fetchWithAuth(
-      `${this.baseUrl}/api/User/NewStaff?apiKey=${this.apiKey}`,
-      {
-        method: "POST",
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify(staff),
-      }
-    );
-    const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.message || "Failed to create staff");
+    try {
+      const response = await axiosInstance.post(
+        `${this.baseUrl}/api/User/NewStaff?apiKey=${this.apiKey}`,
+        staff
+      );
+      return response.data;
+    } catch (error: any) {
+      const message = 
+        error.response?.data?.message || error.message || "Failed to create staff";
+      throw new Error(message);
     }
-    return data;
   }
 
   async toggleService(id: number) {
-    const res = await this.fetchWithAuth(
-      `${this.baseUrl}/api/Service/toggle/${id}`,
-      {
-        method: "POST",
-        headers: this.getAuthHeaders(),
-      }
-    );
-    const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.message || "Failed to toggle service");
+    try {
+      const response = await axiosInstance.post(
+        `${this.baseUrl}/api/Service/toggle/${id}`
+      );
+      return response.data;
+    } catch (error: any) {
+      const message = 
+        error.response?.data?.message || error.message || "Failed to toggle service";
+      throw new Error(message);
     }
-    return data;
   }
 
   // --- ServiceOrder APIs ---
@@ -471,20 +419,18 @@ class JoaliApi {
     quantity: number;
     scheduledFor: string;
   }): Promise<number> {
-    const res = await this.fetchWithAuth(
-      `${this.baseUrl}/api/ServiceOrder/place`,
-      {
-        method: "POST",
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify(order),
-      }
-    );
-    const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.message || "Failed to place order");
+    try {
+      const response = await axiosInstance.post(
+        `${this.baseUrl}/api/ServiceOrder/place`,
+        order
+      );
+      // bookingId is response.data.data.id
+      return response.data?.data?.id;
+    } catch (error: any) {
+      const message = 
+        error.response?.data?.message || error.message || "Failed to place order";
+      throw new Error(message);
     }
-    // bookingId is data.data.id
-    return data?.data?.id;
   }
 
   /**
@@ -500,18 +446,16 @@ class JoaliApi {
    * Get orders for the current user
    */
   async getMyServiceOrders() {
-    const res = await this.fetchWithAuth(
-      `${this.baseUrl}/api/ServiceOrder/my-orders`,
-      {
-        method: "GET",
-        headers: this.getAuthHeaders(),
-      }
-    );
-    const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.message || "Failed to fetch your orders");
+    try {
+      const response = await axiosInstance.get(
+        `${this.baseUrl}/api/ServiceOrder/my-orders`
+      );
+      return response.data;
+    } catch (error: any) {
+      const message = 
+        error.response?.data?.message || error.message || "Failed to fetch your orders";
+      throw new Error(message);
     }
-    return data;
   }
 
   /**
@@ -534,18 +478,16 @@ class JoaliApi {
           )
           .join("&")
       : "";
-    const res = await this.fetchWithAuth(
-      `${this.baseUrl}/api/ServiceOrder/all${query}`,
-      {
-        method: "GET",
-        headers: this.getAuthHeaders(),
-      }
-    );
-    const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.message || "Failed to fetch all orders");
+    try {
+      const response = await axiosInstance.get(
+        `${this.baseUrl}/api/ServiceOrder/all${query}`
+      );
+      return response.data;
+    } catch (error: any) {
+      const message = 
+        error.response?.data?.message || error.message || "Failed to fetch all orders";
+      throw new Error(message);
     }
-    return data;
   }
 
   /**
@@ -554,19 +496,17 @@ class JoaliApi {
    * @param status New status (number)
    */
   async updateServiceOrderStatus(id: number, status: number) {
-    const res = await this.fetchWithAuth(
-      `${this.baseUrl}/api/ServiceOrder/update-status/${id}`,
-      {
-        method: "PUT",
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify({ status }),
-      }
-    );
-    const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.message || "Failed to update order status");
+    try {
+      const response = await axiosInstance.put(
+        `${this.baseUrl}/api/ServiceOrder/update-status/${id}`,
+        { status }
+      );
+      return response.data;
+    } catch (error: any) {
+      const message = 
+        error.response?.data?.message || error.message || "Failed to update order status";
+      throw new Error(message);
     }
-    return data;
   }
 }
 

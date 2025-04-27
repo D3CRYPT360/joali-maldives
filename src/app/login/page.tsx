@@ -41,25 +41,30 @@ export default function login_page() {
         localStorage.setItem("accessToken", data.accessToken);
       }
       const accessToken = data.accessToken || api.getAccessToken();
-      let userId = "";
       if (accessToken) {
         const decoded = jwtDecode(accessToken) as { [key: string]: any };
         const name = decoded["name"] || decoded.name || "User";
-        const userId = decoded["userId"] || "";
+        // Fix: Use a variable that's not shadowed by the local declaration
+        const userIdFromToken = decoded["userId"] || "";
         const role = decoded["role"] || "";
         const hasBooking = decoded["hasBooking"] || false;
         const orgId = decoded["OrgId"] || "";
         if (typeof window !== "undefined") {
           localStorage.setItem("user_name", name);
-          localStorage.setItem("user_id", userId);
+          localStorage.setItem("user_id", userIdFromToken);
           localStorage.setItem("role", role);
           localStorage.setItem("hasBooking", hasBooking.toString());
           localStorage.setItem("OrgId", orgId);
         }
-      }
-      if (userId) {
-        router.push(`/home/${userId}`);
+        
+        // Fix: Use the correct variable for redirection
+        if (userIdFromToken) {
+          router.push(`/home/${userIdFromToken}`);
+        } else {
+          router.push("/");
+        }
       } else {
+        // No token available, redirect to home page
         router.push("/");
       }
     } catch (err: any) {

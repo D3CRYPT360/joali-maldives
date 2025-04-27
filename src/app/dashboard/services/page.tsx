@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import SideBar from "@/components/SideBar";
 import CreateServiceModal from "@/components/CreateServiceModal";
 import { api } from "@/services/api";
+import withAuth from "@/components/withAuth";
 
 type Service = {
   id: number;
@@ -35,7 +36,7 @@ const initialForm = {
   durationInMinutes: 0,
 };
 
-export default function ServicesPage() {
+function ServicesPage() {
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -321,3 +322,5 @@ export default function ServicesPage() {
     </>
   );
 }
+
+export default withAuth(ServicesPage);
