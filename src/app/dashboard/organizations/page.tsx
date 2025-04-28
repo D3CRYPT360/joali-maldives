@@ -52,6 +52,7 @@ function OrganizationsPage() {
     website: "",
     logoUrl: "",
     orgType: 1,
+    initialManager: "",
   };
   const [form, setForm] = useState(initialFormState);
   const [formLoading, setFormLoading] = useState(false);
@@ -200,7 +201,9 @@ function OrganizationsPage() {
                                 checked={org.isActive}
                                 onChange={async () => {
                                   try {
-                                    await organizationService.toggleOrganization(org.id);
+                                    await organizationService.toggleOrganization(
+                                      org.id
+                                    );
                                     setOrgs((orgs) =>
                                       orgs.map((o) =>
                                         o.id === org.id

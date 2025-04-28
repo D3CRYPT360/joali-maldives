@@ -82,6 +82,7 @@ export interface OrganizationCreateParams {
   logoUrl: string;
   website: string;
   orgType: number;
+  initialManager: string;
 }
 
 // Service Types

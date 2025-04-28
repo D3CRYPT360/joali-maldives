@@ -19,17 +19,22 @@ type Room = {
 };
 
 function HotelTitle({ hotelId }: { hotelId: string }) {
-  let hotelName = hotelId;
-  if (typeof window !== "undefined") {
+  const [hotelName, setHotelName] = useState<string>(hotelId);
+  
+  // Move localStorage access to useEffect to avoid hydration mismatch
+  useEffect(() => {
     try {
       const hotelsRaw = localStorage.getItem("hotels");
       if (hotelsRaw) {
         const hotels = JSON.parse(hotelsRaw);
         const found = hotels.find((h: any) => String(h.id) === String(hotelId));
-        if (found && found.name) hotelName = found.name;
+        if (found && found.name) setHotelName(found.name);
       }
-    } catch (e) {}
-  }
+    } catch (e) {
+      console.error("Error fetching hotel name:", e);
+    }
+  }, [hotelId]);
+  
   return (
     <h1 className="text-4xl font-bold text-center text-[#5B2415] mb-2">
       Rooms for {hotelName}

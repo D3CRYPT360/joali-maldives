@@ -49,8 +49,18 @@ export default function login_page() {
 
       // Check if we have user info for redirection
       if (userInfo && userInfo.userId) {
-        // Use the userId from userInfo for redirection
-        router.push(`/home/${userInfo.userId}`);
+        // Check user role for appropriate redirection
+        const role = userInfo.role;
+        const staffRole = userInfo.staffRole;
+        
+        // Redirect staff, managers, and admins to the manage-bookings page
+        if (role === "Staff" || role === "Manager" || role === "Admin" || 
+            staffRole === "Staff" || staffRole === "Manager" || staffRole === "Admin") {
+          router.push("/dashboard/manage-bookings");
+        } else {
+          // Regular customers go to their home page
+          router.push(`/home/${userInfo.userId}`);
+        }
       } else {
         // No user info available, redirect to home page
         router.push("/");

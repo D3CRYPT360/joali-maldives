@@ -2,11 +2,7 @@
  * Service for handling services and service types operations
  */
 import { ApiClient, apiClient } from "./ApiClient";
-import { 
-  Service, 
-  ServiceType,
-  ApiResponse 
-} from "../types/types";
+import { Service, ServiceType, ApiResponse } from "../types/types";
 import axiosInstance from "@/utils/axiosInstace";
 
 export class ServiceService extends ApiClient {
@@ -54,8 +50,10 @@ export class ServiceService extends ApiClient {
       );
       return response.data;
     } catch (error: any) {
-      const message = 
-        error.response?.data?.message || error.message || "Failed to create service";
+      const message =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to create service";
       throw new Error(message);
     }
   }
@@ -72,8 +70,10 @@ export class ServiceService extends ApiClient {
       );
       return response.data;
     } catch (error: any) {
-      const message = 
-        error.response?.data?.message || error.message || "Failed to toggle service";
+      const message =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to toggle service";
       throw new Error(message);
     }
   }
@@ -109,8 +109,10 @@ export class ServiceService extends ApiClient {
       );
       return response.data;
     } catch (error: any) {
-      const message = 
-        error.response?.data?.message || error.message || "Failed to create service type";
+      const message =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to create service type";
       throw new Error(message);
     }
   }

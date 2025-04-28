@@ -8,12 +8,38 @@ const Navbar = () => {
   const router = useRouter();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [homeUrl, setHomeUrl] = useState("/");
+  const [showDashboard, setShowDashboard] = useState(false);
 
   useEffect(() => {
     // Check if accessToken exists in localStorage
     setIsLoggedIn(!!authService.getAccessToken());
+    
+    // Set the home URL based on user_id
+    const userId = localStorage.getItem("user_id");
+    if (userId) {
+      setHomeUrl(`/home/${userId}`);
+    }
+    
+    // Check if user should see dashboard
+    const userRole = localStorage.getItem("role");
+    setShowDashboard(userRole === "Admin" || userRole === "Staff");
+    
     // Listen to storage changes (for multi-tab logout/login)
-    const handleStorage = () => setIsLoggedIn(!!authService.getAccessToken());
+    const handleStorage = () => {
+      setIsLoggedIn(!!authService.getAccessToken());
+      const newUserId = localStorage.getItem("user_id");
+      if (newUserId) {
+        setHomeUrl(`/home/${newUserId}`);
+      } else {
+        setHomeUrl("/");
+      }
+      
+      // Update dashboard visibility on storage change
+      const userRole = localStorage.getItem("role");
+      setShowDashboard(userRole === "Admin" || userRole === "Staff");
+    };
+    
     window.addEventListener("storage", handleStorage);
     return () => window.removeEventListener("storage", handleStorage);
   }, []);
@@ -44,13 +70,7 @@ const Navbar = () => {
   return (
     <nav className="fixed top-0 w-full h-20 bg-white z-50 shadow-sm">
       <div className="container mx-auto px-4 h-full flex items-center justify-between">
-        <a
-          href={
-            typeof window !== "undefined" && localStorage.getItem("user_id")
-              ? `/home/${localStorage.getItem("user_id")}`
-              : "/"
-          }
-        >
+        <a href={homeUrl}>
           <h1 className="text-[#5B2415] text-2xl font-medium cursor-pointer">
             JoaliStay.
           </h1>
@@ -65,13 +85,11 @@ const Navbar = () => {
           <a href="/about" className="hover:text-opacity-80">
             About
           </a>
-          {typeof window !== "undefined" &&
-            (localStorage.getItem("role") === "Admin" ||
-              localStorage.getItem("role") === "Staff") && (
-              <Link href="/dashboard" className="hover:text-opacity-80">
-                Dashboard
-              </Link>
-            )}
+          {showDashboard && (
+            <Link href="/dashboard" className="hover:text-opacity-80">
+              Dashboard
+            </Link>
+          )}
           <Link href="/tickets" className="hover:text-opacity-80">
             Ferry & Activities
           </Link>
@@ -89,12 +107,8 @@ const Navbar = () => {
               className="focus:outline-none"
               title="Go to your home page"
               onClick={() => {
-                const userId =
-                  typeof window !== "undefined"
-                    ? localStorage.getItem("user_id")
-                    : null;
-                if (userId) {
-                  window.location.href = `/home/${userId}`;
+                if (homeUrl !== "/") {
+                  window.location.href = homeUrl;
                 }
               }}
             >

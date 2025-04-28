@@ -134,6 +134,7 @@ export class AuthService extends ApiClient {
         name: decoded["name"] || decoded.name || "User",
         userId: decoded["userId"] || "",
         role: decoded["role"] || "",
+        staffRole: decoded["staffRole"] || false,
         hasBooking: decoded["hasBooking"] || false,
         orgId: decoded["OrgId"] || "",
       };
@@ -155,6 +156,7 @@ export class AuthService extends ApiClient {
     localStorage.setItem("role", userInfo.role);
     localStorage.setItem("hasBooking", String(userInfo.hasBooking));
     localStorage.setItem("OrgId", userInfo.orgId);
+    localStorage.setItem("staffRole", userInfo.staffRole);
   }
 }
 

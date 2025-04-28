@@ -3,15 +3,21 @@ import { NextRouter } from "next/router";
 
 export enum UserRole {
   ADMIN = "Admin",
+  MANAGER = "Manager",
   STAFF = "Staff",
   CUSTOMER = "Customer",
 }
 
 export const routeAccess = {
-  dashboard: [UserRole.ADMIN, UserRole.STAFF],
-  "dashboard/staffs": [UserRole.ADMIN],
+  dashboard: [UserRole.ADMIN, UserRole.STAFF, UserRole.MANAGER],
+  "dashboard/staffs": [UserRole.ADMIN, UserRole.MANAGER],
+  "dashboard/manage-bookings": [
+    UserRole.ADMIN,
+    UserRole.STAFF,
+    UserRole.MANAGER,
+  ],
   "dashboard/organizations": [UserRole.ADMIN],
-  "dashboard/services": [UserRole.ADMIN, UserRole.STAFF],
+  "dashboard/services": [UserRole.ADMIN, UserRole.MANAGER],
   "dashboard/service-types": [UserRole.ADMIN],
   "dashboard/users": [UserRole.ADMIN],
 };
@@ -29,15 +35,18 @@ export const hasAccess = (path: string): boolean => {
   if (typeof window === "undefined") return true; // Server-side, allow access
 
   // Get user role from localStorage
+  const staffRole = localStorage.getItem("staffRole") as UserRole;
   const role = localStorage.getItem("role") as UserRole;
-  const userName = localStorage.getItem("user_name");
-
-  // Special case for admin user
-  if (userName === "Admin") return true;
+  console.log("Role:", role, "Path:", path);
 
   // Check if path requires specific roles
   for (const [route, allowedRoles] of Object.entries(routeAccess)) {
-    if (path.includes(route) && !allowedRoles.includes(role as UserRole)) {
+    console.log("Route:", route, "Allowed Roles:", allowedRoles);
+    if (
+      path.includes(route) &&
+      !allowedRoles.includes(role) &&
+      !allowedRoles.includes(staffRole)
+    ) {
       return false;
     }
   }
@@ -48,12 +57,12 @@ export const hasAccess = (path: string): boolean => {
 // Function to redirect unauthorized users
 export const redirectUnauthorized = (path: string): void => {
   if (typeof window === "undefined" || !router) return;
-  
+
   const userId = localStorage.getItem("user_id");
-  
+
   if (!hasAccess(path)) {
     // Redirect to unauthorized page with explanation
-    router.replace('/unauthorized');
+    router.replace("/unauthorized");
   } else if (!userId) {
     // No user ID, redirect to login
     router.replace("/login");

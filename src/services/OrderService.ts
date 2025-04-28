@@ -81,7 +81,8 @@ export class OrderService extends ApiClient {
 
   /**
    * Get all service orders (admin/org)
-   * @param params Optional filters
+   * @param params Optional filters: { orgId, status, from, to, ... }
+   * @param params.status - 0 - pending 1 - confirmed 2 - cancelled 3 - completed
    * @returns List of all orders
    */
   async getAllServiceOrders(params?: ServiceOrderFilters): Promise<any[]> {

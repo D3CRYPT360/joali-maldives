@@ -68,7 +68,9 @@ export default function CreateOrganizationModal({
             />
           </div>
           <div className="flex flex-col flex-1 min-w-[200px]">
-            <label className="text-sm text-gray-600 mb-1">Registration Number</label>
+            <label className="text-sm text-gray-600 mb-1">
+              Registration Number
+            </label>
             <input
               type="text"
               name="registrationNumber"
@@ -146,6 +148,19 @@ export default function CreateOrganizationModal({
               value={form.logoUrl}
               onChange={onFormChange}
               placeholder="Logo URL"
+              className="border px-3 py-2 rounded text-black"
+            />
+          </div>
+          <div className="flex flex-col flex-1 min-w-[200px]">
+            <label className="text-sm text-gray-600 mb-1">
+              Initial Manager
+            </label>
+            <input
+              type="text"
+              name="initialManager"
+              value={form.initialManager}
+              onChange={onFormChange}
+              placeholder="Email"
               className="border px-3 py-2 rounded text-black"
             />
           </div>

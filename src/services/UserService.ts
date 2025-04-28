@@ -86,6 +86,27 @@ export class UserService extends ApiClient {
       throw new Error(message);
     }
   }
+
+  /**
+   * Set staff role
+   * @param email Staff email
+   * @param Role 0 - Admin, 1 - Manager, 2 - Staff
+   * @returns API response
+   */
+  async setStaffRole(email: String, Role: Number): Promise<ApiResponse> {
+    try {
+      const response = await axiosInstance.get(
+        `${this.baseUrl}/api/User/SetStaffRole?apiKey=${this.apiKey}&email=${email}&role=${Role}`
+      );
+      return response.data;
+    } catch (error: any) {
+      const message =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to set staff role";
+      throw new Error(message);
+    }
+  }
 }
 
 // Export a singleton instance

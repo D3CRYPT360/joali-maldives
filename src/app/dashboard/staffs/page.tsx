@@ -10,7 +10,6 @@ type Staff = {
   id: number;
   name: string;
   email: string;
-  phoneNumber: string;
   staffRole?: string;
   createdAt?: string;
   isActive: boolean;
@@ -25,6 +24,16 @@ function StaffsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [orgNames, setOrgNames] = useState<{ [orgId: number]: string }>({});
+
+  // User role and org ID state
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [userOrgId, setUserOrgId] = useState<number | null>(null);
+
+  // Promotion modal state
+  const [showPromotionModal, setShowPromotionModal] = useState(false);
+  const [selectedStaff, setSelectedStaff] = useState<Staff | null>(null);
+  const [selectedRole, setSelectedRole] = useState<number>(0); // Default to Admin
+  const [promotionLoading, setPromotionLoading] = useState(false);
   // Search state
   const [search, setSearch] = useState("");
 
@@ -56,6 +65,7 @@ function StaffsPage() {
   });
   const [formError, setFormError] = useState("");
   const [formLoading, setFormLoading] = useState(false);
+  const [promotionError, setPromotionError] = useState("");
   const [orgOptions, setOrgOptions] = useState<{ id: number; name: string }[]>(
     []
   );
@@ -64,26 +74,47 @@ function StaffsPage() {
   useEffect(() => {
     if (showModal) {
       organizationService.getAllOrganizations().then((orgs: any) => {
-        setOrgOptions(
-          Array.isArray(orgs)
-            ? orgs.map((o: any) => ({ id: o.id, name: o.name }))
-            : []
-        );
+        // If user is a manager, filter to only show their organization
+        if (userRole === "Manager" && userOrgId) {
+          const managerOrg = Array.isArray(orgs)
+            ? orgs.filter((o: any) => o.id === userOrgId)
+            : [];
+          setOrgOptions(
+            managerOrg.map((o: any) => ({ id: o.id, name: o.name }))
+          );
+
+          // Pre-select the manager's organization and disable changing it
+          setForm((prevForm) => ({
+            ...prevForm,
+            orgId: userOrgId.toString(),
+          }));
+        } else {
+          // For admins, show all organizations
+          setOrgOptions(
+            Array.isArray(orgs)
+              ? orgs.map((o: any) => ({ id: o.id, name: o.name }))
+              : []
+          );
+        }
       });
     }
-  }, [showModal]);
+  }, [showModal, userRole, userOrgId]);
 
-  // Helper to fetch and cache org name
-  const fetchOrgName = async (orgId: number) => {
-    if (!orgId || orgNames[orgId]) return;
+  // Helper to fetch all organizations at once
+  const fetchAllOrganizations = async () => {
     try {
-      const org = await organizationService.getOrganizationById(orgId);
-      setOrgNames((prev) => ({
-        ...prev,
-        [orgId]: org?.name || `Org ${orgId}`,
-      }));
-    } catch {
-      setOrgNames((prev) => ({ ...prev, [orgId]: `Org ${orgId}` }));
+      const orgs = await organizationService.getAllOrganizations();
+      if (Array.isArray(orgs)) {
+        const orgMap: { [orgId: number]: string } = {};
+        orgs.forEach((org: any) => {
+          if (org.id) {
+            orgMap[org.id] = org.name || `Org ${org.id}`;
+          }
+        });
+        setOrgNames(orgMap);
+      }
+    } catch (err) {
+      console.error("Failed to fetch organizations:", err);
     }
   };
 
@@ -95,19 +126,37 @@ function StaffsPage() {
       // Assume API endpoint: /api/User/AllStaffs or filter AllUsers by role (userType === staff)
       const data = await userService.getAllUsers();
       // Filter for staff (userType === 1 or staffRole != null)
-      const filtered = Array.isArray(data)
-        ? data.filter((u: any) => u.userType === 1 || u.staffRole)
-            .map((user: any) => ({
-              id: user.id,
-              name: user.name,
-              email: user.email,
-              phoneNumber: user.phone || '', // Map phone to phoneNumber
-              staffRole: user.role,
-              createdAt: user.createdAt,
-              isActive: user.isActive,
-              orgId: user.organizationId || 0, // Map organizationId to orgId
-            }))
+      let filtered = Array.isArray(data)
+        ? data
+            .filter((u: any) => u.userType === 1 || u.staffRole !== undefined)
+            .map((user: any) => {
+              // Convert numeric staffRole to string representation
+              let roleString = "Staff";
+              if (user.staffRole === 0) {
+                roleString = "Admin";
+              } else if (user.staffRole === 1) {
+                roleString = "Manager";
+              } else if (user.staffRole === 2) {
+                roleString = "Staff";
+              }
+
+              return {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                staffRole: roleString,
+                createdAt: user.createdAt,
+                isActive: user.isActive,
+                orgId: user.orgId || 0, // Map organizationId to orgId
+              };
+            })
         : [];
+
+      // If user is a Manager, filter staff by the manager's organization ID
+      if (userRole === "Manager" && userOrgId) {
+        filtered = filtered.filter((staff) => staff.orgId === userOrgId);
+      }
+
       setStaffs(filtered);
     } catch (err) {
       setError((err as any).message || "Failed to fetch staffs");
@@ -116,9 +165,29 @@ function StaffsPage() {
     }
   }
 
+  // Get user role and org ID from localStorage
   useEffect(() => {
-    fetchStaffs();
+    if (typeof window !== "undefined") {
+      const role = localStorage.getItem("staffRole");
+      setUserRole(role);
+
+      const orgIdStr = localStorage.getItem("OrgId");
+      if (orgIdStr) {
+        try {
+          setUserOrgId(parseInt(orgIdStr, 10));
+        } catch (e) {
+          console.error("Invalid OrgId in localStorage:", orgIdStr);
+        }
+      }
+    }
   }, []);
+
+  useEffect(() => {
+    // Fetch all organizations first, then fetch staffs
+    fetchAllOrganizations().then(() => {
+      fetchStaffs();
+    });
+  }, [userRole, userOrgId]);
 
   return (
     <div className="relative w-full min-h-screen bg-gray-100">
@@ -149,12 +218,120 @@ function StaffsPage() {
               </div>
             </div>
 
+            {/* Promotion Modal */}
+            {showPromotionModal && selectedStaff && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+                <div className="bg-white rounded-lg p-8 shadow-xl max-w-md w-full relative">
+                  <button
+                    className="absolute top-3 right-3 text-gray-400 hover:text-gray-700"
+                    onClick={() => {
+                      setShowPromotionModal(false);
+                      setSelectedStaff(null);
+                      setPromotionError("");
+                    }}
+                    aria-label="Close"
+                  >
+                    &times;
+                  </button>
+                  <h2 className="text-2xl font-bold mb-4 text-[#8B4513] text-center">
+                    Promote Staff
+                  </h2>
+                  {promotionError && (
+                    <div className="text-red-600 mb-4 text-center">
+                      {promotionError}
+                    </div>
+                  )}
+                  <div className="mb-4 text-center">
+                    <p className="text-black mb-2">Promoting staff member:</p>
+                    <p className="font-semibold text-lg text-black">
+                      {selectedStaff.name}
+                    </p>
+                    <p className="text-black">{selectedStaff.email}</p>
+                    <p className="mt-2 text-black">
+                      Current Role:{" "}
+                      <span className="font-medium">
+                        {selectedStaff.staffRole || "Staff"}
+                      </span>
+                    </p>
+                  </div>
+                  <form
+                    onSubmit={async (e) => {
+                      e.preventDefault();
+                      setPromotionError("");
+                      setPromotionLoading(true);
+                      try {
+                        await userService.setStaffRole(
+                          selectedStaff.email,
+                          selectedRole
+                        );
+
+                        // Update the staff role in the local state
+                        setStaffs((prevStaffs) =>
+                          prevStaffs.map((staff) =>
+                            staff.id === selectedStaff.id
+                              ? {
+                                  ...staff,
+                                  staffRole:
+                                    selectedRole === 0
+                                      ? "Admin"
+                                      : selectedRole === 1
+                                      ? "Manager"
+                                      : "Staff",
+                                }
+                              : staff
+                          )
+                        );
+
+                        setShowPromotionModal(false);
+                        setSelectedStaff(null);
+                      } catch (err: any) {
+                        setPromotionError(
+                          err.message || "Failed to promote staff"
+                        );
+                      } finally {
+                        setPromotionLoading(false);
+                      }
+                    }}
+                    className="space-y-4"
+                  >
+                    <div>
+                      <label
+                        className="block mb-2 font-semibold"
+                        htmlFor="role-select"
+                      >
+                        Select New Role
+                      </label>
+                      <select
+                        id="role-select"
+                        className="w-full border px-3 py-2 rounded focus:outline-none focus:ring text-black"
+                        value={selectedRole}
+                        onChange={(e) =>
+                          setSelectedRole(Number(e.target.value))
+                        }
+                      >
+                        <option value={0}>Admin</option>
+                        <option value={1}>Manager</option>
+                        <option value={2}>Staff</option>
+                      </select>
+                    </div>
+                    <button
+                      type="submit"
+                      className="w-full bg-[#8B4513] text-white py-2 rounded font-semibold hover:bg-[#6a3210] transition"
+                      disabled={promotionLoading}
+                    >
+                      {promotionLoading ? "Promoting..." : "Promote Staff"}
+                    </button>
+                  </form>
+                </div>
+              </div>
+            )}
+
             {/* New Staff Modal */}
             {showModal && (
               <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
                 <div className="bg-white rounded-lg p-8 shadow-xl max-w-md w-full relative">
                   <button
-                    className="absolute top-3 right-3 text-gray-400 hover:text-gray-700"
+                    className="absolute top-3 right-3 text-black hover:text-gray-700"
                     onClick={() => setShowModal(false)}
                     aria-label="Close"
                   >
@@ -198,7 +375,7 @@ function StaffsPage() {
                   >
                     <div>
                       <label
-                        className="block mb-1 font-semibold"
+                        className="block mb-1 font-semibold text-gray-500"
                         htmlFor="staff-name"
                       >
                         Name
@@ -216,7 +393,7 @@ function StaffsPage() {
                     </div>
                     <div>
                       <label
-                        className="block mb-1 font-semibold"
+                        className="block mb-1 font-semibold text-gray-500"
                         htmlFor="staff-email"
                       >
                         Email
@@ -224,7 +401,7 @@ function StaffsPage() {
                       <input
                         id="staff-email"
                         type="email"
-                        className="w-full border px-3 py-2 rounded focus:outline-none focus:ring text-black"
+                        className="w-full border px-3 py-2 rounded focus:outline-none focus:ring text-gray-500"
                         value={form.email}
                         onChange={(e) =>
                           setForm({ ...form, email: e.target.value })
@@ -234,7 +411,7 @@ function StaffsPage() {
                     </div>
                     <div>
                       <label
-                        className="block mb-1 font-semibold"
+                        className="block mb-1 font-semibold text-gray-500"
                         htmlFor="staff-phone"
                       >
                         Phone Number
@@ -242,7 +419,7 @@ function StaffsPage() {
                       <input
                         id="staff-phone"
                         type="tel"
-                        className="w-full border px-3 py-2 rounded focus:outline-none focus:ring text-black"
+                        className="w-full border px-3 py-2 rounded focus:outline-none focus:ring text-gray-500"
                         value={form.phoneNumber}
                         onChange={(e) =>
                           setForm({ ...form, phoneNumber: e.target.value })
@@ -252,19 +429,20 @@ function StaffsPage() {
                     </div>
                     <div>
                       <label
-                        className="block mb-1 font-semibold"
+                        className="block mb-1 font-semibold text-gray-500"
                         htmlFor="staff-org"
                       >
                         Organization
                       </label>
                       <select
                         id="staff-org"
-                        className="w-full border px-3 py-2 rounded focus:outline-none focus:ring text-black"
+                        className="w-full border px-3 py-2 rounded focus:outline-none focus:ring text-gray-500"
                         value={form.orgId}
                         onChange={(e) =>
                           setForm({ ...form, orgId: e.target.value })
                         }
                         required
+                        disabled={userRole === "Manager"} // Disable for managers
                       >
                         <option value="" disabled>
                           Select organization
@@ -289,7 +467,7 @@ function StaffsPage() {
             )}
 
             {loading ? (
-              <div className="text-center text-gray-500">Loading staffs...</div>
+              <div className="text-center text-black">Loading staffs...</div>
             ) : error ? (
               <div className="text-center text-red-600">{error}</div>
             ) : (
@@ -309,10 +487,6 @@ function StaffsPage() {
                   </thead>
                   <tbody>
                     {filteredStaffs.map((staff: Staff, idx: number) => {
-                      // Fetch org name if not already cached
-                      if (staff.orgId && !orgNames[staff.orgId]) {
-                        fetchOrgName(staff.orgId);
-                      }
                       return (
                         <tr key={staff.id || idx} className="border-b">
                           <td className="py-4 text-black font-medium">
@@ -325,9 +499,7 @@ function StaffsPage() {
                             {staff.name}
                           </td>
                           <td className="py-4 text-black">{staff.email}</td>
-                          <td className="py-4 text-black">
-                            {staff.staffRole || "-"}
-                          </td>
+                          <td className="py-4 text-black">{staff.staffRole}</td>
                           <td
                             className="py-4 text-black"
                             data-raw-date={staff.createdAt ?? ""}
@@ -359,31 +531,57 @@ function StaffsPage() {
                                 staff.name &&
                                 staff.name.toLowerCase() === "admin"
                               ) && (
-                                <label className="relative inline-flex items-center cursor-pointer">
-                                  <input
-                                    type="checkbox"
-                                    checked={staff.isActive}
-                                    onChange={async () => {
-                                      try {
-                                        await userService.toggleUser(
-                                          staff.email
-                                        );
-                                        setStaffs((staffs) =>
-                                          staffs.map((s) =>
-                                            s.id === staff.id
-                                              ? { ...s, isActive: !s.isActive }
-                                              : s
-                                          )
-                                        );
-                                      } catch (err) {
-                                        alert("Failed to toggle staff");
+                                <div className="flex gap-2">
+                                  <label className="relative inline-flex items-center cursor-pointer">
+                                    <input
+                                      type="checkbox"
+                                      checked={staff.isActive}
+                                      onChange={async () => {
+                                        try {
+                                          await userService.toggleUser(
+                                            staff.email
+                                          );
+                                          setStaffs((staffs) =>
+                                            staffs.map((s) =>
+                                              s.id === staff.id
+                                                ? {
+                                                    ...s,
+                                                    isActive: !s.isActive,
+                                                  }
+                                                : s
+                                            )
+                                          );
+                                        } catch (err) {
+                                          alert("Failed to toggle staff");
+                                        }
+                                      }}
+                                      className="sr-only peer"
+                                    />
+                                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer dark:bg-gray-700 peer-checked:bg-green-600 transition-all text-black"></div>
+                                    <div className="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-all peer-checked:translate-x-full"></div>
+                                  </label>
+
+                                  <button
+                                    onClick={() => {
+                                      setSelectedStaff(staff);
+                                      setShowPromotionModal(true);
+
+                                      // Set initial role based on current role
+                                      if (staff.staffRole === "Admin") {
+                                        setSelectedRole(0);
+                                      } else if (
+                                        staff.staffRole === "Manager"
+                                      ) {
+                                        setSelectedRole(1);
+                                      } else {
+                                        setSelectedRole(2);
                                       }
                                     }}
-                                    className="sr-only peer"
-                                  />
-                                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer dark:bg-gray-700 peer-checked:bg-green-600 transition-all text-black"></div>
-                                  <div className="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-all peer-checked:translate-x-full"></div>
-                                </label>
+                                    className="px-2 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600 transition"
+                                  >
+                                    Promote
+                                  </button>
+                                </div>
                               )}
                             </div>
                           </td>

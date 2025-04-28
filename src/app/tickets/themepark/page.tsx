@@ -51,12 +51,13 @@ function ThemeParkActivitiesPage() {
                 location={activity.location || activity.serviceType?.name || "Theme Park"}
                 price={activity.price?.toString()}
                 buttonLabel="Purchase"
-                onButtonClick={async () => {
+                showQuantity={true}
+                onButtonClick={async (quantity) => {
                   try {
-                    // Place a service order for this activity
+                    // Place a service order for this activity with the selected quantity
                     const bookingId = await orderService.placeServiceOrder({
                       serviceId: activity.id,
-                      quantity: 1,
+                      quantity: quantity,
                       scheduledFor: new Date().toISOString(), // or allow user to pick
                     });
                     // Redirect to payment gateway with bookingId
