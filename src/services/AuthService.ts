@@ -137,6 +137,7 @@ export class AuthService extends ApiClient {
         staffRole: decoded["staffRole"] || false,
         hasBooking: decoded["hasBooking"] || false,
         orgId: decoded["OrgId"] || "",
+        email: decoded["email"] || "",
       };
     } catch (error) {
       console.error("Error decoding token:", error);
@@ -157,6 +158,7 @@ export class AuthService extends ApiClient {
     localStorage.setItem("hasBooking", String(userInfo.hasBooking));
     localStorage.setItem("OrgId", userInfo.orgId);
     localStorage.setItem("staffRole", userInfo.staffRole);
+    localStorage.setItem("user_email", userInfo.email);
   }
 }
 

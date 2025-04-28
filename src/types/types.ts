@@ -44,7 +44,7 @@ export interface StaffCreateParams {
   name: string;
   email: string;
   phoneNumber: string;
-  orgId: number;
+  orgId?: number;
 }
 
 export interface InitialPasswordResetParams {
@@ -92,11 +92,14 @@ export interface Service {
   description: string;
   price: number;
   orgId: number;
+  organization?: Organization;
   serviceTypeId: number;
+  serviceType?: ServiceType;
   capacity?: number;
   durationInMinutes?: number;
   imageUrl: string;
   isActive?: boolean;
+  createdAt?: string;
 }
 
 export interface ServiceType {

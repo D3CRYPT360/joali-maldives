@@ -2,7 +2,11 @@
 
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { hasAccess, setRouter, redirectUnauthorized } from "@/utils/axiosInstace";
+import {
+  hasAccess,
+  setRouter,
+  redirectUnauthorized,
+} from "@/utils/axiosInstace";
 
 // Loading component to show while checking authorization
 const AuthCheckingLoader = () => (
@@ -26,47 +30,47 @@ export default function withAuth<P extends object>(
     const router = useRouter();
     const pathname = usePathname();
     const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
-    
+
     // Register router for global use
     useEffect(() => {
       // @ts-ignore - NextRouter vs AppRouter type mismatch, but functionality is the same
       setRouter(router);
     }, [router]);
-    
+
     useEffect(() => {
       // Reset authorization state when pathname changes
       setIsAuthorized(null);
-      
+
       // Check if user is authenticated and has access to this route
       if (typeof window !== "undefined") {
         const accessToken = localStorage.getItem("accessToken");
-        
+
         if (!accessToken) {
           // No token, redirect to login
           router.replace("/login");
           return;
         }
-        
+
         // Check role-based access for current path
         if (!hasAccess(pathname || "")) {
           redirectUnauthorized(pathname || "");
           return;
         }
-        
+
         // Small delay to ensure authorization check is complete
         const timer = setTimeout(() => {
           setIsAuthorized(true);
         }, 300); // 300ms delay should be enough for most cases
-        
+
         return () => clearTimeout(timer);
       }
     }, [pathname, router]);
-    
+
     // Show loading state while checking authorization
     if (isAuthorized === null) {
       return <AuthCheckingLoader />;
     }
-    
+
     // Render the wrapped component with all its props when authorized
     return <Component {...props} />;
   };

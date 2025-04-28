@@ -11,7 +11,9 @@ interface CreateServiceModalProps {
   success: string;
   form: any;
   onFormChange: (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
   ) => void;
   orgOptions: { id: number; name: string }[];
   serviceTypeOptions: { id: number; name: string }[];
@@ -62,7 +64,7 @@ export default function CreateServiceModal({
               className="border px-3 py-2 rounded text-black"
             />
           </div>
-          
+
           <div className="flex flex-col flex-1 min-w-[180px]">
             <label className="text-sm text-gray-600 mb-1">Organization</label>
             <select
@@ -74,11 +76,13 @@ export default function CreateServiceModal({
             >
               <option value={0}>Select organization</option>
               {orgOptions.map((org) => (
-                <option key={org.id} value={org.id}>{org.name}</option>
+                <option key={org.id} value={org.id}>
+                  {org.name}
+                </option>
               ))}
             </select>
           </div>
-          
+
           <div className="flex flex-col flex-1 min-w-[180px]">
             <label className="text-sm text-gray-600 mb-1">Service Type</label>
             <select
@@ -90,7 +94,9 @@ export default function CreateServiceModal({
             >
               <option value={0}>Select service type</option>
               {serviceTypeOptions.map((type) => (
-                <option key={type.id} value={type.id}>{type.name}</option>
+                <option key={type.id} value={type.id}>
+                  {type.name}
+                </option>
               ))}
             </select>
           </div>
@@ -103,11 +109,11 @@ export default function CreateServiceModal({
               onChange={onFormChange}
               placeholder="Description"
               required
-              className="border px-3 py-2 rounded resize-none min-h-[60px]"
+              className="border px-3 py-2 rounded resize-none min-h-[60px] text-black"
               rows={2}
             />
           </div>
-          
+
           <div className="flex flex-wrap gap-4 w-full">
             <div className="flex flex-col flex-1 min-w-[100px]">
               <label className="text-sm text-gray-600 mb-1">Price</label>
@@ -123,7 +129,7 @@ export default function CreateServiceModal({
                 className="border px-3 py-2 rounded text-black"
               />
             </div>
-            
+
             <div className="flex flex-col flex-1 min-w-[100px]">
               <label className="text-sm text-gray-600 mb-1">Capacity</label>
               <input
@@ -136,9 +142,11 @@ export default function CreateServiceModal({
                 className="border px-3 py-2 rounded text-black"
               />
             </div>
-            
+
             <div className="flex flex-col flex-1 min-w-[120px]">
-              <label className="text-sm text-gray-600 mb-1">Duration (min)</label>
+              <label className="text-sm text-gray-600 mb-1">
+                Duration (min)
+              </label>
               <input
                 type="number"
                 name="durationInMinutes"
@@ -149,7 +157,7 @@ export default function CreateServiceModal({
                 className="border px-3 py-2 rounded text-black"
               />
             </div>
-            
+
             <div className="flex flex-col flex-1 min-w-[200px]">
               <label className="text-sm text-gray-600 mb-1">Image URL</label>
               <input
@@ -162,14 +170,18 @@ export default function CreateServiceModal({
               />
             </div>
           </div>
-          
+
           {error && (
-            <div className="text-red-600 text-center text-sm w-full">{error}</div>
+            <div className="text-red-600 text-center text-sm w-full">
+              {error}
+            </div>
           )}
           {success && (
-            <div className="text-green-700 text-center text-sm w-full">{success}</div>
+            <div className="text-green-700 text-center text-sm w-full">
+              {success}
+            </div>
           )}
-          
+
           <div className="w-full text-right mt-2">
             <button
               type="submit"

@@ -351,12 +351,19 @@ function StaffsPage() {
                       setFormError("");
                       setFormLoading(true);
                       try {
-                        await userService.createStaff({
+                        // Create staff data object
+                        const staffData = {
                           name: form.name,
                           email: form.email,
                           phoneNumber: form.phoneNumber,
-                          orgId: Number(form.orgId),
-                        });
+                        };
+                        
+                        // Only add orgId if it's not 0 (None)
+                        if (form.orgId !== "0") {
+                          Object.assign(staffData, { orgId: Number(form.orgId) });
+                        }
+                        
+                        await userService.createStaff(staffData);
                         setShowModal(false);
                         setForm({
                           name: "",
@@ -447,6 +454,7 @@ function StaffsPage() {
                         <option value="" disabled>
                           Select organization
                         </option>
+                        <option value="0">None</option>
                         {orgOptions.map((org) => (
                           <option key={org.id} value={org.id}>
                             {org.name}

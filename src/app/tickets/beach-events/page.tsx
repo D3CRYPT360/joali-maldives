@@ -5,16 +5,16 @@ import ActivityCard from "@/components/ActivityCard";
 import { serviceService, orderService } from "@/services/index";
 import { Service } from "@/types/types";
 
-function FerryBookingPage() {
-  const [ferryServices, setFerryServices] = useState<Service[]>([]);
+function BeachEventsPage() {
+  const [beachEvents, setBeachEvents] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [selectedFerry, setSelectedFerry] = useState<Service | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<Service | null>(null);
   const [form, setForm] = useState({
     name: "",
     email: "",
     date: "",
-    passengers: 1,
+    participants: 1,
   });
   const [userLoaded, setUserLoaded] = useState(false);
 
@@ -40,23 +40,23 @@ function FerryBookingPage() {
     }
   }, [userLoaded]);
 
-  // Fetch ferry services on component mount
+  // Fetch beach events on component mount
   useEffect(() => {
-    async function fetchFerryServices() {
+    async function fetchBeachEvents() {
       try {
         setLoading(true);
-        // Filter services with serviceTypeId 3 (Ferry)
-        const services = await serviceService.getAllServices({ typeId: 3 });
-        setFerryServices(services);
+        // Filter services with serviceTypeId 4 (Beach Events)
+        const services = await serviceService.getAllServices({ typeId: 4 });
+        setBeachEvents(services);
       } catch (err) {
-        console.error("Error fetching ferry services:", err);
-        setError("Failed to load ferry services. Please try again later.");
+        console.error("Error fetching beach events:", err);
+        setError("Failed to load beach events. Please try again later.");
       } finally {
         setLoading(false);
       }
     }
 
-    fetchFerryServices();
+    fetchBeachEvents();
   }, []);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -66,21 +66,21 @@ function FerryBookingPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!selectedFerry) {
-      setError("Please select a ferry service first");
+    if (!selectedEvent) {
+      setError("Please select a beach event first");
       return;
     }
     
-    if (!selectedFerry.id) {
-      setError("Invalid ferry service selected");
+    if (!selectedEvent.id) {
+      setError("Invalid beach event selected");
       return;
     }
     
     try {
-      // Place a service order for this ferry with the selected quantity and date
+      // Place a service order for this beach event with the selected quantity and date
       const result = await orderService.placeServiceOrder({
-        serviceId: selectedFerry.id,
-        quantity: form.passengers,
+        serviceId: selectedEvent.id,
+        quantity: form.participants,
         scheduledFor: form.date ? new Date(form.date).toISOString() : new Date().toISOString(),
       });
       
@@ -95,59 +95,58 @@ function FerryBookingPage() {
     }
   }
 
-  function handleFerrySelect(ferry: Service, quantity: number) {
-    setSelectedFerry(ferry);
-    setForm((prev) => ({ ...prev, passengers: quantity }));
-    // No need to scroll as we're using a modal popup now
+  function handleEventSelect(event: Service, quantity: number) {
+    setSelectedEvent(event);
+    setForm((prev) => ({ ...prev, participants: quantity }));
+    // No need to scroll as we're using a modal popup
   }
 
   return (
     <div className="min-h-screen flex flex-col items-center py-8 bg-gradient-to-b from-[#f8f3f1] to-[#f7f5f3]">
       <div className="container mx-auto px-4">
         <h1 className="text-3xl font-bold mb-8 text-center text-gray-900">
-          Ferry Services
+          Beach Events
         </h1>
 
         {loading ? (
           <div className="text-center py-12">
-            <p className="text-gray-600">Loading ferry services...</p>
+            <p className="text-gray-600">Loading beach events...</p>
           </div>
         ) : error ? (
           <div className="text-center py-12">
             <p className="text-red-500">{error}</p>
           </div>
-        ) : ferryServices.length === 0 ? (
+        ) : beachEvents.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-gray-600">
-              No ferry services available at the moment.
+              No beach events available at the moment.
             </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-            {ferryServices.map((ferry) => (
+            {beachEvents.map((event) => (
               <ActivityCard
-                key={ferry.id}
-                image={ferry.imageUrl || "/images/ferry-placeholder.jpg"}
-                title={ferry.name}
-                location={ferry.organization?.name || ""}
-                price={ferry.price?.toString()}
-                buttonLabel="Select Ferry"
+                key={event.id}
+                image={event.imageUrl || "/images/beach-event-placeholder.jpg"}
+                title={event.name}
+                location={event.organization?.name || ""}
+                price={event.price?.toString()}
+                buttonLabel="Purchase"
                 showQuantity={true}
-                onButtonClick={(quantity) => handleFerrySelect(ferry, quantity)}
+                onButtonClick={(quantity) => handleEventSelect(event, quantity)}
               />
             ))}
           </div>
         )}
 
-        {/* Booking Modal Popup */}
-        {selectedFerry && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-            <div className="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto relative">
-              {/* Close button */}
+        {/* Modal for booking form */}
+        {selectedEvent && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl shadow-2xl p-6 max-w-md w-full max-h-[90vh] overflow-y-auto">
               <button
-                onClick={() => setSelectedFerry(null)}
-                className="absolute top-4 right-4 text-gray-500 hover:text-gray-800"
-                type="button"
+                onClick={() => setSelectedEvent(null)}
+                className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+                aria-label="Close"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -166,17 +165,17 @@ function FerryBookingPage() {
               </button>
 
               <h2 className="text-2xl font-bold mb-4 text-center text-gray-900">
-                Book {selectedFerry.name}
+                Book {selectedEvent.name}
               </h2>
               <p className="mb-4 text-center text-gray-600">
-                {selectedFerry.description}
+                {selectedEvent.description}
               </p>
               <p className="mb-4 text-center text-black">
                 <span className="font-semibold">Duration:</span>{" "}
-                {selectedFerry.durationInMinutes} minutes
+                {selectedEvent.durationInMinutes} minutes
                 <br />
-                <span className="font-semibold ">Price per person:</span> $
-                {selectedFerry.price}
+                <span className="font-semibold">Price per person:</span> $
+                {selectedEvent.price}
               </p>
 
               <form
@@ -194,14 +193,14 @@ function FerryBookingPage() {
                   className="border rounded-lg px-4 py-2"
                 />
                 <div className="flex justify-between items-center">
-                  <label className="text-gray-700">Passengers:</label>
+                  <label className="text-gray-700">Participants:</label>
                   <div className="flex items-center border rounded-lg overflow-hidden">
                     <button
                       className="px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 transition"
                       onClick={() =>
                         setForm((prev) => ({
                           ...prev,
-                          passengers: Math.max(1, prev.passengers - 1),
+                          participants: Math.max(1, prev.participants - 1),
                         }))
                       }
                       type="button"
@@ -209,14 +208,14 @@ function FerryBookingPage() {
                       -
                     </button>
                     <span className="px-3 py-1 bg-white text-black font-medium">
-                      {form.passengers}
+                      {form.participants}
                     </span>
                     <button
                       className="px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 transition"
                       onClick={() =>
                         setForm((prev) => ({
                           ...prev,
-                          passengers: prev.passengers + 1,
+                          participants: prev.participants + 1,
                         }))
                       }
                       type="button"
@@ -228,13 +227,13 @@ function FerryBookingPage() {
                 <div className="mt-2 text-right">
                   <span className="font-bold text-lg text-black">
                     Total: $
-                    {(Number(selectedFerry.price) * form.passengers).toFixed(2)}
+                    {(Number(selectedEvent.price) * form.participants).toFixed(2)}
                   </span>
                 </div>
                 <div className="flex gap-3 mt-2">
                   <button
                     type="button"
-                    onClick={() => setSelectedFerry(null)}
+                    onClick={() => setSelectedEvent(null)}
                     className="flex-1 bg-gray-200 text-gray-800 font-semibold py-2 px-6 rounded-lg hover:bg-gray-300 transition-colors"
                   >
                     Cancel
@@ -255,4 +254,4 @@ function FerryBookingPage() {
   );
 }
 
-export default withBookingCheck(FerryBookingPage);
+export default withBookingCheck(BeachEventsPage);
