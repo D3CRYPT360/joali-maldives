@@ -122,8 +122,7 @@ export class OrderService extends ApiClient {
   ): Promise<ApiResponse> {
     try {
       const response = await axiosInstance.put(
-        `${this.baseUrl}/api/ServiceOrder/update-status/${id}`,
-        { status }
+        `${this.baseUrl}/api/ServiceOrder/update-status/${id}?status=${status}`
       );
       return response.data;
     } catch (error: any) {

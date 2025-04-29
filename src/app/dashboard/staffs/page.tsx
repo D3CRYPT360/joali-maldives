@@ -152,9 +152,17 @@ function StaffsPage() {
             })
         : [];
 
-      // If user is a Manager, filter staff by the manager's organization ID
+      // If user is a Manager, strictly filter staff by the manager's organization ID
+      // This is critical to prevent managers from seeing staff from other organizations
       if (userRole === "Manager" && userOrgId) {
-        filtered = filtered.filter((staff) => staff.orgId === userOrgId);
+        console.log(`Filtering staffs for manager with orgId: ${userOrgId}`);
+        filtered = filtered.filter((staff) => {
+          const match = staff.orgId === userOrgId;
+          if (!match) {
+            console.log(`Filtered out staff ${staff.name} with orgId ${staff.orgId}`);
+          }
+          return match;
+        });
       }
 
       setStaffs(filtered);
@@ -168,16 +176,22 @@ function StaffsPage() {
   // Get user role and org ID from localStorage
   useEffect(() => {
     if (typeof window !== "undefined") {
+      // Get role from staffRole or decode from JWT token
       const role = localStorage.getItem("staffRole");
       setUserRole(role);
 
-      const orgIdStr = localStorage.getItem("OrgId");
+      // Get organization ID with fallbacks for different storage keys
+      const orgIdStr = localStorage.getItem("OrgId") || localStorage.getItem("organizationId");
       if (orgIdStr) {
         try {
-          setUserOrgId(parseInt(orgIdStr, 10));
+          const orgId = parseInt(orgIdStr, 10);
+          setUserOrgId(orgId);
+          console.log("Setting user org ID:", orgId);
         } catch (e) {
           console.error("Invalid OrgId in localStorage:", orgIdStr);
         }
+      } else {
+        console.warn("No organization ID found in localStorage");
       }
     }
   }, []);

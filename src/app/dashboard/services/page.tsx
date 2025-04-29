@@ -250,7 +250,7 @@ function ServicesPage() {
                             className="px-6 py-4 whitespace-nowrap max-w-[200px] truncate"
                             title={svc.description}
                           >
-                            {svc.description}
+                            {svc.description }
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             ${svc.price}

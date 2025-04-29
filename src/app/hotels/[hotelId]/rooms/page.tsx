@@ -16,6 +16,12 @@ type Room = {
   capacity?: number;
   durationInMinutes?: number;
   serviceType?: { name: string };
+  organization?: {
+    id: number;
+    name: string;
+    isActive: boolean;
+  };
+  isActive: boolean; // Service's active status
 };
 
 function HotelTitle({ hotelId }: { hotelId: string }) {
@@ -60,7 +66,13 @@ export default function HotelRoomsPage({
     serviceService
       .getAllServices({ orgId: hotelId, typeId: 1 })
       .then((data: any) => {
-        setRooms(Array.isArray(data) ? data : []);
+        // Filter out inactive services
+        const activeRooms = Array.isArray(data) 
+          ? data.filter(room => room.isActive === true)
+          : [];
+        
+        console.log(`Found ${activeRooms.length} active rooms out of ${Array.isArray(data) ? data.length : 0} total rooms`);
+        setRooms(activeRooms);
         setLoading(false);
       })
       .catch((err: any) => {

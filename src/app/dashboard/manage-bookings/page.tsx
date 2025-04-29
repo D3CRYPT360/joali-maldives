@@ -132,13 +132,13 @@ function StaffHomePage() {
     setUpdateLoading((prev) => ({ ...prev, [orderId]: true }));
     try {
       await orderService.updateServiceOrderStatus(orderId, newStatus);
-
-      // Update local state
-      setOrders((prevOrders) =>
-        prevOrders.map((order) =>
-          order.id === orderId ? { ...order, status: newStatus } : order
-        )
-      );
+      
+      // Refresh the entire orders list to ensure we have the latest data
+      await fetchOrders();
+      
+      // Show success message
+      const statusLabel = ORDER_STATUS[newStatus]?.label || "Unknown";
+      console.log(`Order #${orderId} status updated to ${statusLabel}`);
     } catch (err: any) {
       alert(err.message || "Failed to update order status");
     } finally {

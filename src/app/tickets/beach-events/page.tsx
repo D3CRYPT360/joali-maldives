@@ -47,7 +47,14 @@ function BeachEventsPage() {
         setLoading(true);
         // Filter services with serviceTypeId 4 (Beach Events)
         const services = await serviceService.getAllServices({ typeId: 4 });
-        setBeachEvents(services);
+        
+        // Filter out inactive services
+        const activeServices = Array.isArray(services) 
+          ? services.filter(service => service.isActive === true)
+          : [];
+          
+        console.log(`Found ${activeServices.length} active beach events out of ${Array.isArray(services) ? services.length : 0} total events`);
+        setBeachEvents(activeServices);
       } catch (err) {
         console.error("Error fetching beach events:", err);
         setError("Failed to load beach events. Please try again later.");

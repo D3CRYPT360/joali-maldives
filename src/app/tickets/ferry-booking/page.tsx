@@ -47,7 +47,14 @@ function FerryBookingPage() {
         setLoading(true);
         // Filter services with serviceTypeId 3 (Ferry)
         const services = await serviceService.getAllServices({ typeId: 3 });
-        setFerryServices(services);
+        
+        // Filter out inactive services
+        const activeServices = Array.isArray(services) 
+          ? services.filter(service => service.isActive === true)
+          : [];
+          
+        console.log(`Found ${activeServices.length} active ferry services out of ${Array.isArray(services) ? services.length : 0} total services`);
+        setFerryServices(activeServices);
       } catch (err) {
         console.error("Error fetching ferry services:", err);
         setError("Failed to load ferry services. Please try again later.");

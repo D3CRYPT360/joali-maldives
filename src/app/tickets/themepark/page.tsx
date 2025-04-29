@@ -15,7 +15,13 @@ function ThemeParkActivitiesPage() {
     setError(null);
     serviceService.getAllServices({ typeId: 2 })
       .then((data: any) => {
-        setActivities(Array.isArray(data) ? data : []);
+        // Filter out inactive services
+        const activeServices = Array.isArray(data) 
+          ? data.filter(service => service.isActive === true)
+          : [];
+          
+        console.log(`Found ${activeServices.length} active theme park activities out of ${Array.isArray(data) ? data.length : 0} total activities`);
+        setActivities(activeServices);
         setLoading(false);
       })
       .catch((err: any) => {
