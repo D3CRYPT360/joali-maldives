@@ -125,10 +125,18 @@ function StaffsPage() {
     try {
       // Assume API endpoint: /api/User/AllStaffs or filter AllUsers by role (userType === staff)
       const data = await userService.getAllUsers();
-      // Filter for staff (userType === 1 or staffRole != null)
+      // Filter for staff (userType === 1 or staffRole is 0, 1, or 2)
       let filtered = Array.isArray(data)
         ? data
-            .filter((u: any) => u.userType === 1 || u.staffRole !== undefined)
+            .filter((u: any) => {
+              // Only include users with valid staffRole values (0, 1, 2)
+              return (
+                u.userType === 1 ||
+                (u.staffRole !== undefined &&
+                  u.staffRole !== null &&
+                  [0, 1, 2].includes(u.staffRole))
+              );
+            })
             .map((user: any) => {
               // Convert numeric staffRole to string representation
               let roleString = "Staff";
@@ -159,7 +167,9 @@ function StaffsPage() {
         filtered = filtered.filter((staff) => {
           const match = staff.orgId === userOrgId;
           if (!match) {
-            console.log(`Filtered out staff ${staff.name} with orgId ${staff.orgId}`);
+            console.log(
+              `Filtered out staff ${staff.name} with orgId ${staff.orgId}`
+            );
           }
           return match;
         });
@@ -180,8 +190,8 @@ function StaffsPage() {
       const role = localStorage.getItem("staffRole");
       setUserRole(role);
 
-      // Get organization ID with fallbacks for different storage keys
-      const orgIdStr = localStorage.getItem("OrgId") || localStorage.getItem("organizationId");
+      // Get organization ID
+      const orgIdStr = localStorage.getItem("OrgId");
       if (orgIdStr) {
         try {
           const orgId = parseInt(orgIdStr, 10);
@@ -371,12 +381,14 @@ function StaffsPage() {
                           email: form.email,
                           phoneNumber: form.phoneNumber,
                         };
-                        
+
                         // Only add orgId if it's not 0 (None)
                         if (form.orgId !== "0") {
-                          Object.assign(staffData, { orgId: Number(form.orgId) });
+                          Object.assign(staffData, {
+                            orgId: Number(form.orgId),
+                          });
                         }
-                        
+
                         await userService.createStaff(staffData);
                         setShowModal(false);
                         setForm({
@@ -504,7 +516,9 @@ function StaffsPage() {
                       <th className="pb-3">Role</th>
                       <th className="pb-3">Created At</th>
                       <th className="pb-3">Status</th>
-                      {userRole !== "Manager" && <th className="pb-3">Action</th>}
+                      {userRole !== "Manager" && (
+                        <th className="pb-3">Action</th>
+                      )}
                     </tr>
                   </thead>
                   <tbody>
