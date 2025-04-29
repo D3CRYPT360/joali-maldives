@@ -150,7 +150,8 @@ export default function SideBar() {
             </Link>
           )}
           {/* Hide Services for Staff and Customer, but always show for Admin */}
-          {(staffRole === "Admin" || role !== "Customer") && (
+          {(staffRole === "Admin" ||
+            (role !== "Customer" && staffRole !== "Staff")) && (
             <Link href="/dashboard/services">
               <li
                 className={`text-gray-700 text-base flex items-center gap-x-4 cursor-pointer p-2 hover:bg-gray-200 rounded-md `}

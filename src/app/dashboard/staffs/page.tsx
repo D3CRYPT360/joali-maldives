@@ -504,7 +504,7 @@ function StaffsPage() {
                       <th className="pb-3">Role</th>
                       <th className="pb-3">Created At</th>
                       <th className="pb-3">Status</th>
-                      <th className="pb-3">Action</th>
+                      {userRole !== "Manager" && <th className="pb-3">Action</th>}
                     </tr>
                   </thead>
                   <tbody>
@@ -546,67 +546,69 @@ function StaffsPage() {
                               {staff.isActive ? "Active" : "Inactive"}
                             </span>
                           </td>
-                          <td className="py-4">
-                            <div className="flex items-center gap-2">
-                              {/* Toggle Switch */}
-                              {!(
-                                staff.name &&
-                                staff.name.toLowerCase() === "admin"
-                              ) && (
-                                <div className="flex gap-2">
-                                  <label className="relative inline-flex items-center cursor-pointer">
-                                    <input
-                                      type="checkbox"
-                                      checked={staff.isActive}
-                                      onChange={async () => {
-                                        try {
-                                          await userService.toggleUser(
-                                            staff.email
-                                          );
-                                          setStaffs((staffs) =>
-                                            staffs.map((s) =>
-                                              s.id === staff.id
-                                                ? {
-                                                    ...s,
-                                                    isActive: !s.isActive,
-                                                  }
-                                                : s
-                                            )
-                                          );
-                                        } catch (err) {
-                                          alert("Failed to toggle staff");
+                          {userRole !== "Manager" && (
+                            <td className="py-4">
+                              <div className="flex items-center gap-2">
+                                {/* Toggle Switch */}
+                                {!(
+                                  staff.name &&
+                                  staff.name.toLowerCase() === "admin"
+                                ) && (
+                                  <div className="flex gap-2">
+                                    <label className="relative inline-flex items-center cursor-pointer">
+                                      <input
+                                        type="checkbox"
+                                        checked={staff.isActive}
+                                        onChange={async () => {
+                                          try {
+                                            await userService.toggleUser(
+                                              staff.email
+                                            );
+                                            setStaffs((staffs) =>
+                                              staffs.map((s) =>
+                                                s.id === staff.id
+                                                  ? {
+                                                      ...s,
+                                                      isActive: !s.isActive,
+                                                    }
+                                                  : s
+                                              )
+                                            );
+                                          } catch (err) {
+                                            alert("Failed to toggle staff");
+                                          }
+                                        }}
+                                        className="sr-only peer"
+                                      />
+                                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer dark:bg-gray-700 peer-checked:bg-green-600 transition-all text-black"></div>
+                                      <div className="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-all peer-checked:translate-x-full"></div>
+                                    </label>
+
+                                    <button
+                                      onClick={() => {
+                                        setSelectedStaff(staff);
+                                        setShowPromotionModal(true);
+
+                                        // Set initial role based on current role
+                                        if (staff.staffRole === "Admin") {
+                                          setSelectedRole(0);
+                                        } else if (
+                                          staff.staffRole === "Manager"
+                                        ) {
+                                          setSelectedRole(1);
+                                        } else {
+                                          setSelectedRole(2);
                                         }
                                       }}
-                                      className="sr-only peer"
-                                    />
-                                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer dark:bg-gray-700 peer-checked:bg-green-600 transition-all text-black"></div>
-                                    <div className="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-all peer-checked:translate-x-full"></div>
-                                  </label>
-
-                                  <button
-                                    onClick={() => {
-                                      setSelectedStaff(staff);
-                                      setShowPromotionModal(true);
-
-                                      // Set initial role based on current role
-                                      if (staff.staffRole === "Admin") {
-                                        setSelectedRole(0);
-                                      } else if (
-                                        staff.staffRole === "Manager"
-                                      ) {
-                                        setSelectedRole(1);
-                                      } else {
-                                        setSelectedRole(2);
-                                      }
-                                    }}
-                                    className="px-2 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600 transition"
-                                  >
-                                    Promote
-                                  </button>
-                                </div>
-                              )}
-                            </div>
-                          </td>
+                                      className="px-2 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600 transition"
+                                    >
+                                      Promote
+                                    </button>
+                                  </div>
+                                )}
+                              </div>
+                            </td>
+                          )}
                         </tr>
                       );
                     })}
