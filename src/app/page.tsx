@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useState } from "react";
 import ActivityCard from "@/components/ActivityCard";
+import Link from "next/link";
 
 export default function Home() {
   const [checkInDate, setCheckInDate] = useState("");
@@ -37,17 +38,20 @@ export default function Home() {
         <div className="container mx-auto grid md:grid-cols-2 gap-12 items-center">
           <div>
             <h2 className="text-[#152C5B] text-4xl md:text-5xl font-bold leading-tight mb-6">
-              Forget Busy Work,
+              Want To Relax During Vacation?
               <br />
-              Start Your Next Vacation
+              Visit Joali
             </h2>
             <p className="text-[#B0B0B0] mb-8">
-              We provide what you need to enjoy your holidays.
-              <br /> Time to make unforgettable moments.
+              We provide what you need to enjoy holidays with your family.
+              <br /> Time to create some amazing memories.
+      
             </p>
+            <Link href="/hotels">
             <button className="bg-[#5B2415] text-white px-8 py-3 rounded-lg">
-              Show More
+              View Hotels
             </button>
+            </Link>
           </div>
           <div className="relative">
             <div className="bg-[#C4C4C4] w-full h-[400px] rounded-[30px] overflow-hidden">

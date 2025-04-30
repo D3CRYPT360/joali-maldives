@@ -73,6 +73,7 @@ const Footer = () => {
               </li>
               <li>
                 <Link
+
                   href="/about"
                   className="text-[#152C5B] hover:text-[#5B2415] transition-colors"
                 >
@@ -115,7 +116,7 @@ const Footer = () => {
               <input
                 type="email"
                 placeholder="Your email"
-                className="bg-[#2A2A2A] text-gray-400 px-4 py-2 rounded-lg flex-grow focus:outline-none focus:ring-2 focus:ring-[#ECAF9E] text-black"
+                className="bg-[#2A2A2A] text-gray-400 px-4 py-2 rounded-lg flex-grow focus:outline-none focus:ring-2 focus:ring-[#ECAF9E]"
               />
               <button className="bg-[#152C5B] hover:bg-[#5B2415] px-4 py-2 rounded-lg transition-colors">
                 Subscribe
