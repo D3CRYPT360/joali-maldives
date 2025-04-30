@@ -37,11 +37,8 @@ export const hasAccess = (path: string): boolean => {
   // Get user role from localStorage
   const staffRole = localStorage.getItem("staffRole") as UserRole;
   const role = localStorage.getItem("role") as UserRole;
-  console.log("Role:", role, "Path:", path);
-
   // Check if path requires specific roles
   for (const [route, allowedRoles] of Object.entries(routeAccess)) {
-    console.log("Route:", route, "Allowed Roles:", allowedRoles);
     if (
       path.includes(route) &&
       !allowedRoles.includes(role) &&

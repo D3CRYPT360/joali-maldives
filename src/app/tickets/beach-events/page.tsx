@@ -47,13 +47,17 @@ function BeachEventsPage() {
         setLoading(true);
         // Filter services with serviceTypeId 4 (Beach Events)
         const services = await serviceService.getAllServices({ typeId: 4 });
-        
+
         // Filter out inactive services
-        const activeServices = Array.isArray(services) 
-          ? services.filter(service => service.isActive === true)
+        const activeServices = Array.isArray(services)
+          ? services.filter((service) => service.isActive === true)
           : [];
-          
-        console.log(`Found ${activeServices.length} active beach events out of ${Array.isArray(services) ? services.length : 0} total events`);
+
+        console.log(
+          `Found ${activeServices.length} active beach events out of ${
+            Array.isArray(services) ? services.length : 0
+          } total events`
+        );
         setBeachEvents(activeServices);
       } catch (err) {
         console.error("Error fetching beach events:", err);
@@ -77,28 +81,30 @@ function BeachEventsPage() {
       setError("Please select a beach event first");
       return;
     }
-    
+
     if (!selectedEvent.id) {
       setError("Invalid beach event selected");
       return;
     }
-    
+
     try {
       // Place a service order for this beach event with the selected quantity and date
       const result = await orderService.placeServiceOrder({
         serviceId: selectedEvent.id,
         quantity: form.participants,
-        scheduledFor: form.date ? new Date(form.date).toISOString() : new Date().toISOString(),
+        scheduledFor: form.date
+          ? new Date(form.date).toISOString()
+          : new Date().toISOString(),
       });
-      
+
       // Redirect to payment gateway with bookingId
       if (result !== undefined) {
         window.location.href = `/payment?bookingId=${result}`;
       } else {
-        setError('Failed to create booking for payment.');
+        setError("Failed to create booking for payment.");
       }
     } catch (err: any) {
-      setError(err.message || 'Failed to create booking.');
+      setError(err.message || "Failed to create booking.");
     }
   }
 
@@ -178,9 +184,6 @@ function BeachEventsPage() {
                 {selectedEvent.description}
               </p>
               <p className="mb-4 text-center text-black">
-                <span className="font-semibold">Duration:</span>{" "}
-                {selectedEvent.durationInMinutes} minutes
-                <br />
                 <span className="font-semibold">Price per person:</span> $
                 {selectedEvent.price}
               </p>
@@ -191,14 +194,18 @@ function BeachEventsPage() {
               >
                 <input type="hidden" name="name" value={form.name} />
                 <input type="hidden" name="email" value={form.email} />
-                <input
-                  type="date"
-                  name="date"
-                  value={form.date}
-                  onChange={handleChange}
-                  required
-                  className="border rounded-lg px-4 py-2"
-                />
+                <div className="flex flex-col gap-1">
+                  <label className="text-gray-700">Event Date:</label>
+                  <input
+                    type="date"
+                    name="date"
+                    value={form.date}
+                    onChange={handleChange}
+                    required
+                    min={new Date().toISOString().split('T')[0]}
+                    className="border rounded-lg px-4 py-2"
+                  />
+                </div>
                 <div className="flex justify-between items-center">
                   <label className="text-gray-700">Participants:</label>
                   <div className="flex items-center border rounded-lg overflow-hidden">
@@ -234,7 +241,9 @@ function BeachEventsPage() {
                 <div className="mt-2 text-right">
                   <span className="font-bold text-lg text-black">
                     Total: $
-                    {(Number(selectedEvent.price) * form.participants).toFixed(2)}
+                    {(Number(selectedEvent.price) * form.participants).toFixed(
+                      2
+                    )}
                   </span>
                 </div>
                 <div className="flex gap-3 mt-2">

@@ -8,7 +8,6 @@ import {
   redirectUnauthorized,
 } from "@/utils/axiosInstace";
 
-// Loading component to show while checking authorization
 const AuthCheckingLoader = () => (
   <div className="min-h-screen flex items-center justify-center bg-gray-100">
     <div className="bg-white p-8 rounded-lg shadow-md max-w-md w-full text-center">
@@ -18,11 +17,6 @@ const AuthCheckingLoader = () => (
   </div>
 );
 
-/**
- * Higher-order component (HOC) for protecting routes based on user role
- * @param Component The component to wrap with authentication
- * @returns A new component with authentication logic
- */
 export default function withAuth<P extends object>(
   Component: React.ComponentType<P>
 ) {
@@ -31,14 +25,12 @@ export default function withAuth<P extends object>(
     const pathname = usePathname();
     const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
 
-    // Register router for global use
     useEffect(() => {
       // @ts-ignore - NextRouter vs AppRouter type mismatch, but functionality is the same
       setRouter(router);
     }, [router]);
 
     useEffect(() => {
-      // Reset authorization state when pathname changes
       setIsAuthorized(null);
 
       // Check if user is authenticated and has access to this route
@@ -60,18 +52,15 @@ export default function withAuth<P extends object>(
         // Small delay to ensure authorization check is complete
         const timer = setTimeout(() => {
           setIsAuthorized(true);
-        }, 300); // 300ms delay should be enough for most cases
+        }, 300);
 
         return () => clearTimeout(timer);
       }
     }, [pathname, router]);
 
-    // Show loading state while checking authorization
     if (isAuthorized === null) {
       return <AuthCheckingLoader />;
     }
-
-    // Render the wrapped component with all its props when authorized
     return <Component {...props} />;
   };
 }

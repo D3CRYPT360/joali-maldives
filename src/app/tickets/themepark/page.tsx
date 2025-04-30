@@ -13,14 +13,19 @@ function ThemeParkActivitiesPage() {
   useEffect(() => {
     setLoading(true);
     setError(null);
-    serviceService.getAllServices({ typeId: 2 })
+    serviceService
+      .getAllServices({ typeId: 2 })
       .then((data: any) => {
         // Filter out inactive services
-        const activeServices = Array.isArray(data) 
-          ? data.filter(service => service.isActive === true)
+        const activeServices = Array.isArray(data)
+          ? data.filter((service) => service.isActive === true)
           : [];
-          
-        console.log(`Found ${activeServices.length} active theme park activities out of ${Array.isArray(data) ? data.length : 0} total activities`);
+
+        console.log(
+          `Found ${activeServices.length} active theme park activities out of ${
+            Array.isArray(data) ? data.length : 0
+          } total activities`
+        );
         setActivities(activeServices);
         setLoading(false);
       })
@@ -42,19 +47,27 @@ function ThemeParkActivitiesPage() {
           Discover and book your favorite theme park adventures
         </p>
         {loading ? (
-          <div className="text-center text-[#8B4513] text-lg">Loading activities...</div>
+          <div className="text-center text-[#8B4513] text-lg">
+            Loading activities...
+          </div>
         ) : error ? (
           <div className="text-center text-red-600 text-lg">{error}</div>
         ) : activities.length === 0 ? (
-          <div className="text-center text-[#8B4513] text-lg">No activities found for this theme park.</div>
+          <div className="text-center text-[#8B4513] text-lg">
+            No activities found for this theme park.
+          </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
             {activities.map((activity, idx) => (
               <ActivityCard
                 key={activity.id || idx}
-                image={activity.imageUrl || "/images/themepark-placeholder.jpg"}
+                image={activity.imageUrl}
                 title={activity.name}
-                location={activity.location || activity.serviceType?.name || "Theme Park"}
+                location={
+                  activity.location ||
+                  activity.serviceType?.name ||
+                  "Theme Park"
+                }
                 price={activity.price?.toString()}
                 buttonLabel="Purchase"
                 showQuantity={true}
@@ -70,10 +83,10 @@ function ThemeParkActivitiesPage() {
                     if (bookingId) {
                       window.location.href = `/payment?bookingId=${bookingId}`;
                     } else {
-                      alert('Failed to create booking for payment.');
+                      alert("Failed to create booking for payment.");
                     }
                   } catch (err: any) {
-                    alert(err.message || 'Failed to create booking.');
+                    alert(err.message || "Failed to create booking.");
                   }
                 }}
               />
