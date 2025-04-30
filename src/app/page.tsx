@@ -45,6 +45,7 @@ export default function Home() {
             <p className="text-[#B0B0B0] mb-8">
               We provide what you need to enjoy holidays with your family.
               <br /> Time to create some amazing memories.
+      
             </p>
             <Link href="/hotels">
             <button className="bg-[#5B2415] text-white px-8 py-3 rounded-lg">

@@ -68,7 +68,16 @@ const Footer = () => {
                   href="/hotels"
                   className="text-[#152C5B] hover:text-[#5B2415] transition-colors"
                 >
-                  Rooms
+                  Hotels
+                </Link>
+              </li>
+              <li>
+                <Link
+
+                  href="/about"
+                  className="text-[#152C5B] hover:text-[#5B2415] transition-colors"
+                >
+                  About Us
                 </Link>
               </li>
               <li>
@@ -76,15 +85,7 @@ const Footer = () => {
                   href="/tickets"
                   className="text-[#152C5B] hover:text-[#5B2415] transition-colors"
                 >
-                  Activities
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/about"
-                  className="text-[#152C5B] hover:text-[#5B2415] transition-colors"
-                >
-                  About Us
+                  Ferry & Activities
                 </Link>
               </li>
             </ul>

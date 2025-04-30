@@ -81,7 +81,7 @@ export default function PaymentPage() {
         {/* Payment Summary Section */}
         <div className="md:w-1/2 flex flex-col justify-center items-center p-12 bg-gradient-to-br from-[#f6e9da] to-[#ecd3b6] border-b md:border-b-0 md:border-r border-[#ecd3b6] min-h-[500px]">
           <img
-            src="/images/payment-hero.png"
+            src="/images/payment.png"
             alt="Payment"
             className="w-44 h-44 object-contain mb-8 drop-shadow-lg"
           />

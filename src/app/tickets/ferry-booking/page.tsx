@@ -192,14 +192,18 @@ function FerryBookingPage() {
               >
                 <input type="hidden" name="name" value={form.name} />
                 <input type="hidden" name="email" value={form.email} />
-                <input
-                  type="date"
-                  name="date"
-                  value={form.date}
-                  onChange={handleChange}
-                  required
-                  className="border rounded-lg px-4 py-2"
-                />
+                <div className="flex flex-col gap-1">
+                  <label className="text-gray-700">Travel Date:</label>
+                  <input
+                    type="date"
+                    name="date"
+                    value={form.date}
+                    onChange={handleChange}
+                    required
+                    min={new Date().toISOString().split('T')[0]}
+                    className="border rounded-lg px-4 py-2"
+                  />
+                </div>
                 <div className="flex justify-between items-center">
                   <label className="text-gray-700">Passengers:</label>
                   <div className="flex items-center border rounded-lg overflow-hidden">

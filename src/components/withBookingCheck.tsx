@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-// Message component to show when no booking is found
 const NoBookingMessage = () => (
   <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-[#f8f3f1] to-[#f7f5f3]">
     <div className="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full text-center">
@@ -46,7 +45,6 @@ const NoBookingMessage = () => (
   </div>
 );
 
-// Loading component to show while checking booking status
 const BookingCheckLoader = () => (
   <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#f8f3f1] to-[#f7f5f3]">
     <div className="bg-white p-8 rounded-2xl shadow-md max-w-md w-full text-center">
@@ -56,11 +54,6 @@ const BookingCheckLoader = () => (
   </div>
 );
 
-/**
- * Higher-order component (HOC) for checking if user has a valid booking
- * @param Component The component to wrap with booking check
- * @returns A new component with booking check logic
- */
 export default function withBookingCheck<P extends object>(
   Component: React.ComponentType<P>
 ) {
@@ -69,12 +62,9 @@ export default function withBookingCheck<P extends object>(
     const [hasBooking, setHasBooking] = useState<boolean | null>(null);
 
     useEffect(() => {
-      // Reset booking state
       setHasBooking(null);
 
-      // Check if user has a booking
       if (typeof window !== "undefined") {
-        // Small delay to ensure smooth UI transition
         const timer = setTimeout(() => {
           const bookingStatus = localStorage.getItem("hasBooking");
           setHasBooking(bookingStatus === "True");
@@ -84,17 +74,13 @@ export default function withBookingCheck<P extends object>(
       }
     }, [router]);
 
-    // Show loading state while checking booking status
     if (hasBooking === null) {
       return <BookingCheckLoader />;
     }
-
-    // Show message if no booking is found
     if (hasBooking === false) {
       return <NoBookingMessage />;
     }
 
-    // Render the wrapped component with all its props when booking is found
     return <Component {...props} />;
   };
 }
