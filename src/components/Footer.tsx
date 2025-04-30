@@ -65,18 +65,10 @@ const Footer = () => {
               </li>
               <li>
                 <Link
-                  href="/rooms"
+                  href="/hotels"
                   className="text-[#152C5B] hover:text-[#5B2415] transition-colors"
                 >
-                  Rooms
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/activities"
-                  className="text-[#152C5B] hover:text-[#5B2415] transition-colors"
-                >
-                  Activities
+                  Hotels
                 </Link>
               </li>
               <li>
@@ -85,6 +77,14 @@ const Footer = () => {
                   className="text-[#152C5B] hover:text-[#5B2415] transition-colors"
                 >
                   About Us
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/tickets"
+                  className="text-[#152C5B] hover:text-[#5B2415] transition-colors"
+                >
+                  Ferry & Activities
                 </Link>
               </li>
             </ul>

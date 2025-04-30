@@ -39,11 +39,11 @@ export default function Home() {
             <h2 className="text-[#152C5B] text-4xl md:text-5xl font-bold leading-tight mb-6">
               Forget Busy Work,
               <br />
-              Start Next Vacation
+              Start Your Next Vacation
             </h2>
             <p className="text-[#B0B0B0] mb-8">
-              We provide what you need to enjoy your holiday with family.
-              <br /> Time to make another memorable moments.
+              We provide what you need to enjoy your holidays.
+              <br /> Time to make unforgettable moments.
             </p>
             <button className="bg-[#5B2415] text-white px-8 py-3 rounded-lg">
               Show More
