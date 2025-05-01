@@ -4,32 +4,26 @@ import Image from "next/image";
 import { useState } from "react";
 import ActivityCard from "@/components/ActivityCard";
 import Link from "next/link";
+import Ads from "@/components/Ads";
+import Map from "@/components/Map";
 
 export default function Home() {
   const [checkInDate, setCheckInDate] = useState("");
   const [duration, setDuration] = useState("");
   const [persons, setPersons] = useState(2);
 
-  const activities = [
+  const ads = [
     {
-      image: "/images/water-slide.png",
-      title: "Water Slide",
-      location: "Main Pool Area",
-      price: "25",
-    },
-    {
-      image: "/images/go-cart.jpg",
-      title: "Go Karting",
-      location: "Racing Track",
-      price: "35",
-    },
-    {
-      image: "/images/family-slide.jpg",
-      title: "Family Slide",
-      location: "Family Pool",
-      price: "30",
-    },
+      image: "/images/Advertisement.jpg",
+    }  
   ];
+
+  const maps = [
+    {
+      image: "/images/Map.jpg",
+    }  
+  ];
+
 
   return (
     <div className="relative w-full min-h-screen bg-[#F9F9F9]">
@@ -66,25 +60,40 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Theme Park Activities */}
+      {/* Ads */}
       <section className="py-20 px-4">
         <div className="container mx-auto">
           <h3 className="text-[#152C5B] text-2xl font-medium mb-8">
-            Theme park Activities
+            Resort Advertisement
           </h3>
-          <div className="grid md:grid-cols-3 gap-6 text-[#152C5B]">
-            {activities.map((activity, index) => (
-              <ActivityCard
+          <div className="grid md:grid-cols-1 gap-6 text-[#152C5B]">
+            {ads.map((ad, index) => (
+              <Ads
                 key={index}
-                image={activity.image}
-                title={activity.title}
-                location={activity.location}
-                price={activity.price}
+                image={ad.image}
               />
             ))}
           </div>
         </div>
       </section>
+
+      {/* Map */}
+      <section className="py-20 px-4">
+        <div className="container mx-auto">
+          <h3 className="text-[#152C5B] text-2xl font-medium mb-8">
+            Resort Map
+          </h3>
+          <div className="grid md:grid-cols-1 gap-6 text-[#152C5B]">
+            {maps.map((map, index) => (
+              <Map
+                key={index}
+                image={map.image}
+              />
+            ))}
+          </div>
+        </div>
+      </section>
+      
     </div>
   );
 }

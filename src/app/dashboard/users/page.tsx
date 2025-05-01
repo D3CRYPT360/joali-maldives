@@ -63,13 +63,13 @@ function UsersPage() {
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search by name or email..."
-                className="border px-4 py-2 rounded-md w-full md:w-64"
+                placeholder="Search Users"
+                className="border px-4 py-2 rounded-md w-full md:w-64 text-black"
               />
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value as any)}
-                className="border px-4 py-2 rounded-md w-full md:w-48"
+                className="border px-4 py-2 rounded-md w-full md:w-48 text-gray-500"
               >
                 <option value="all">All Users</option>
                 <option value="active">Active Only</option>
@@ -105,6 +105,9 @@ function UsersPage() {
                             .includes(search.toLowerCase()) ||
                           user.email
                             .toLowerCase()
+                            .includes(search.toLowerCase()) ||
+                          user.id
+                            .toString()
                             .includes(search.toLowerCase());
                         const matchesStatus =
                           statusFilter === "all" ||

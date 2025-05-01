@@ -46,7 +46,8 @@ function StaffsPage() {
     return (
       staff.name.toLowerCase().includes(searchLower) ||
       staff.email.toLowerCase().includes(searchLower) ||
-      orgName.toLowerCase().includes(searchLower)
+      orgName.toLowerCase().includes(searchLower) ||
+      staff.id.toString().includes(searchLower)
     );
   });
 
