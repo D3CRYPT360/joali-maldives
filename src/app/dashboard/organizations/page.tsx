@@ -59,6 +59,21 @@ function OrganizationsPage() {
   const [formError, setFormError] = useState("");
   const [formSuccess, setFormSuccess] = useState("");
 
+  // Search state
+    const [search, setSearch] = useState("");
+  
+    // Filtered organization list based on search
+    const filteredOrgs = orgs.filter((org) => {
+      
+      const searchLower = search.toLowerCase();
+      return (
+        org.name.toLowerCase().includes(searchLower) ||
+        org.email.toLowerCase().includes(searchLower) ||
+        org.country.toLowerCase().includes(searchLower) ||
+        org.id.toString().includes(searchLower)
+      );
+    });
+
   useEffect(() => {
     async function fetchOrgs() {
       setLoading(true);
@@ -120,6 +135,7 @@ function OrganizationsPage() {
                 <input
                   type="text"
                   placeholder="Search organizations..."
+                  onChange={(e) => setSearch(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none text-black focus:border-[#8B4513]"
                 />
               </div>
@@ -158,7 +174,7 @@ function OrganizationsPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {orgs.map((org, idx) => (
+                    {filteredOrgs.map((org, idx) => (
                       <tr key={org.id || idx} className="border-b">
                         <td className="py-4 text-black">{org.id || idx}</td>
                         <td className="py-4 text-black font-medium flex items-center gap-2">
